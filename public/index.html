@@ -202,8 +202,83 @@ body.authenticated #authScreen {
 }
 
 .desktop {
+    position: relative;
     height: 100vh;
     padding: 20px;
+}
+
+.desktop-widget-layer {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 5;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(190px, 245px));
+    grid-auto-rows: minmax(90px, auto);
+    gap: 10px;
+    max-width: min(510px, calc(100vw - 150px));
+    pointer-events: none;
+    align-content: start;
+}
+.desktop-widget {
+    position: relative;
+    min-width: 0;
+    padding: 12px;
+    color: white;
+    background: #101d31eF;
+    border: 1px solid #ffffff30;
+    border-left: 3px solid var(--accent);
+    border-radius: 12px;
+    box-shadow: 0 10px 28px #0005;
+    backdrop-filter: blur(18px);
+    pointer-events: auto;
+    cursor: grab;
+}
+.desktop-widget:active { cursor: grabbing; }
+.desktop-widget h3 { margin: 0 0 8px; font-size: 12px; color: #c5d9f0; font-weight: 600; }
+.desktop-widget-value { font-size: 25px; font-weight: 700; }
+.desktop-widget-sub { margin-top: 4px; color: #b9c8dd; font-size: 11px; }
+.desktop-widget-weather { display:flex; align-items:center; gap:10px; }
+.desktop-widget-weather .weather-icon { font-size: 34px; }
+.desktop-widget-weather strong { font-size: 25px; }
+.desktop-widget-remove {
+    position:absolute; top:5px; right:6px; width:23px; height:23px;
+    padding:0; margin:0; border:0; border-radius:6px; color:#dcecff;
+    background:#ffffff16; cursor:pointer;
+}
+.desktop-widget-remove:hover { background:#a83242; }
+.widget-center {
+    position: fixed;
+    top: 72px;
+    right: 16px;
+    z-index: 12000;
+    width: min(340px, calc(100vw - 24px));
+    max-height: min(70vh, 560px);
+    overflow:auto;
+    padding: 16px;
+    display:none;
+    color:white;
+    background:#14243bf5;
+    border:1px solid #ffffff35;
+    border-radius:14px;
+    box-shadow:0 18px 50px #0009;
+    backdrop-filter:blur(22px);
+}
+.widget-center h3 { margin:0 0 5px; }
+.widget-center p { margin:0 0 12px; color:#b9c8dd; font-size:12px; }
+.widget-center-list { display:flex; flex-direction:column; gap:8px; }
+.widget-center-row { display:flex; align-items:center; gap:10px; padding:10px; background:#ffffff0d; border:1px solid #ffffff20; border-radius:9px; }
+.widget-center-row .widget-center-meta { flex:1; min-width:0; }
+.widget-center-row small { display:block; color:#b9c8dd; margin-top:3px; font-size:11px; }
+.widget-center-row button { margin:0; padding:7px 10px; }
+.widget-center-row button:disabled { opacity:.45; cursor:not-allowed; }
+@media(max-width:760px) {
+    .desktop-widget-layer { top: 10px; right: 10px; grid-template-columns:minmax(160px, 1fr); max-width: min(230px, calc(100vw - 130px)); }
+}
+@media(max-width:430px) {
+    .desktop-widget-layer { top: 8px; right: 8px; max-width: calc(100vw - 125px); }
+    .desktop-widget { padding:9px; }
+    .desktop-widget-value { font-size:20px; }
 }
 
 .desktop-icon.selected {
@@ -544,7 +619,7 @@ body.authenticated #authScreen {
 .game-help { margin:0; color:#a9bfd8; font-size:12px; line-height:1.45; }
 
 
-/* NEUE APPS 0.7 */
+/* NEUE APPS 0.8 */
 .calculator-app,.system-control-app,.weather-app { display:flex; flex-direction:column; gap:13px; max-width:100%; }
 .calculator-heading,.weather-header { display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; }
 .calculator-heading h2,.weather-header h2,.system-control-heading h2 { margin:0 0 4px; }
@@ -957,6 +1032,8 @@ body.authenticated #authScreen {
 
     <div class="taskbar-right">
 
+        <button class="notification-button" onclick="toggleWidgetCenter()" title="Desktop-Widgets">▦</button>
+
         <button class="notification-button"
                 onclick="toggleNotifications()"
                 title="Benachrichtigungen">
@@ -1082,6 +1159,15 @@ let savedGames = [];
 const DEFAULT_DESKTOP_SHORTCUTS = ["taskmanager", "appcenter", "browser", "settings", "terminal", "trash"];
 let desktopShortcuts = [...DEFAULT_DESKTOP_SHORTCUTS];
 let selectedDesktopApp = null;
+const DEFAULT_DESKTOP_WIDGETS = ["clock", "date", "system"];
+const WIDGET_CATALOG = {
+    clock: {title:"Uhr", icon:"🕒", description:"Zeigt die aktuelle Uhrzeit."},
+    date: {title:"Datum", icon:"📅", description:"Zeigt Wochentag und Datum."},
+    system: {title:"Systemübersicht", icon:"💻", description:"Zeigt Browser- und Bildschirmdaten."},
+    weather: {title:"Wetter", icon:"🌦️", description:"Zeigt das aktuelle Wetter für deinen gespeicherten Ort.", requiresApp:"weather"}
+};
+let desktopWidgets = [...DEFAULT_DESKTOP_WIDGETS];
+let widgetWeatherRequest = 0;
 
 let windows = {};
 let activeWindow = null;
@@ -1162,6 +1248,15 @@ function saveDesktopShortcuts() {
     return queueSave("thyqoraDesktopShortcuts", desktopShortcuts);
 }
 
+function saveDesktopWidgets() {
+    return queueSave("thyqoraDesktopWidgets", desktopWidgets);
+}
+
+function isWidgetAvailable(id) {
+    const widget = WIDGET_CATALOG[id];
+    return !!widget && (!widget.requiresApp || isAppInstalled(widget.requiresApp));
+}
+
 function isAppInstalled(id) {
     return CORE_APPS.includes(id) || installedApps.includes(id);
 }
@@ -1174,6 +1269,7 @@ async function installApp(id) {
     renderAppGrid(document.getElementById("appSearch")?.value || "");
     renderAppCenter();
     await saveInstalledApps();
+    renderDesktop();
     notify("App installiert", APP_CATALOG[id].title + " wurde hinzugefügt.");
 }
 
@@ -1183,8 +1279,13 @@ async function uninstallApp(id) {
 
     if (windows[id]) closeWindow(id);
     installedApps = installedApps.filter(appId => appId !== id);
+    if (id === "weather") {
+        desktopWidgets = desktopWidgets.filter(widgetId => widgetId !== "weather");
+        await saveDesktopWidgets();
+    }
     renderAppGrid(document.getElementById("appSearch")?.value || "");
     renderAppCenter();
+    renderDesktop();
     await saveInstalledApps();
     notify("App deinstalliert", APP_CATALOG[id].title + " wurde entfernt.");
 }
@@ -1260,6 +1361,11 @@ async function loadCloudSettings() {
             ? [...new Set(loadedShortcuts.filter(id => id === "trash" || (apps[id] && isAppInstalled(id))))]
             : [...DEFAULT_DESKTOP_SHORTCUTS];
 
+        const loadedWidgets = readValue("thyqoraDesktopWidgets");
+        desktopWidgets = Array.isArray(loadedWidgets)
+            ? [...new Set(loadedWidgets.filter(isWidgetAvailable))]
+            : [...DEFAULT_DESKTOP_WIDGETS];
+
         applySettings();
         renderDesktop();
 
@@ -1271,6 +1377,7 @@ async function loadCloudSettings() {
         await saveTrash();
         await saveInstalledApps();
         await saveDesktopShortcuts();
+        await saveDesktopWidgets();
 
         notify("Cloud geladen", "Deine THYQORA-Daten wurden geladen.");
 
@@ -2723,7 +2830,7 @@ function systemControlContent() {
         Object.entries(wallpapers).map(([number,background]) => "<button type='button' class='control-wallpaper " + (Number(settings.background) === Number(number) ? "selected" : "") + "' data-wallpaper='" + number + "' style='background:" + background + "' aria-label='Hintergrund " + number + "' title='Hintergrund " + number + "' onclick='setBackground(" + number + ")'></button>").join("") +
         "</div></section>" +
         "<section class='control-section'><h3>🔊 THYQORA-Lautstärke</h3><div class='control-volume-row'><input class='system-control-volume' type='range' min='0' max='100' value='" + settings.volume + "' oninput='setVolume(this.value)' aria-label='THYQORA-Lautstärke'><strong class='system-control-volume-value'>" + settings.volume + "%</strong></div><p class='monitor-note'>Dieser Regler speichert die Lautstärke-Einstellung in THYQORA OS. Er verändert nicht die Windows-Lautstärke.</p></section>" +
-        "<section class='control-section control-account'><h3>👤 Konto und System</h3><div><span>Angemeldet als</span><strong>" + escapeHTML(currentUsername || "Unbekannt") + "</strong></div><div><span>Version</span><strong>THYQORA OS 0.7</strong></div><div><span>Cloud-Speicher</span><strong>" + (cloudReady ? "Verbunden" : "Nicht verbunden") + "</strong></div><button type='button' onclick='logout()'>Abmelden</button></section></div>";
+        "<section class='control-section control-account'><h3>👤 Konto und System</h3><div><span>Angemeldet als</span><strong>" + escapeHTML(currentUsername || "Unbekannt") + "</strong></div><div><span>Version</span><strong>THYQORA OS 0.8</strong></div><div><span>Cloud-Speicher</span><strong>" + (cloudReady ? "Verbunden" : "Nicht verbunden") + "</strong></div><button type='button' onclick='logout()'>Abmelden</button></section></div>";
 }
 
 
@@ -2788,6 +2895,7 @@ async function loadWeatherForecast(saveCity = false) {
 
         weatherCity = place.name + (place.admin1 ? ", " + place.admin1 : "");
         if (saveCity) queueSave("thyqoraWeatherCity", weatherCity);
+        if (desktopWidgets.includes("weather")) loadDesktopWeatherWidget();
 
         const current = data.current;
         const description = weatherDescription(current.weather_code);
@@ -2876,7 +2984,7 @@ function getAppContent(app) {
         return `
             <div class="terminal">
                 <div id="terminalOutput">
-                    THYQORA TERMINAL [Version 0.7]<br>
+                    THYQORA TERMINAL [Version 0.8]<br>
                     Schreibe help für alle Befehle.<br><br>
                 </div>
 
@@ -2892,7 +3000,7 @@ function getAppContent(app) {
     if (app === "about") {
         return `
             <h2>💻 THYQORA OS</h2>
-            <p>Version 0.7</p>
+            <p>Version 0.8</p>
             <p>Ein eigenes browserbasiertes Betriebssystem.</p>
 
             <h3>Systeminformationen</h3>
@@ -3272,6 +3380,166 @@ function renderDesktop() {
         });
         desktop.appendChild(icon);
     });
+
+    renderDesktopWidgets();
+}
+
+function renderDesktopWidgets() {
+    const desktop = document.getElementById("desktop");
+    if (!desktop) return;
+
+    const layer = document.createElement("div");
+    layer.className = "desktop-widget-layer";
+    layer.id = "desktopWidgetLayer";
+
+    desktopWidgets = desktopWidgets.filter(isWidgetAvailable);
+    desktopWidgets.forEach(id => {
+        const widget = WIDGET_CATALOG[id];
+        if (!widget) return;
+        const card = document.createElement("section");
+        card.className = "desktop-widget";
+        card.draggable = true;
+        card.dataset.widgetId = id;
+
+        let body = "";
+        if (id === "clock") {
+            body = "<div class='desktop-widget-value' data-widget-clock>--:--:--</div><div class='desktop-widget-sub'>THYQORA OS</div>";
+        } else if (id === "date") {
+            body = "<div class='desktop-widget-value' data-widget-date>--</div><div class='desktop-widget-sub'>Kalenderdatum</div>";
+        } else if (id === "system") {
+            body = "<div class='desktop-widget-value'>" + (navigator.hardwareConcurrency || "–") + " Kerne</div><div class='desktop-widget-sub'>" + screen.width + " × " + screen.height + " · " + (navigator.onLine ? "Online" : "Offline") + "</div>";
+        } else if (id === "weather") {
+            body = "<div class='desktop-widget-weather'><span class='weather-icon' data-widget-weather-icon>🌦️</span><div><strong data-widget-weather-temp>--°</strong><div class='desktop-widget-sub' data-widget-weather-place>" + (weatherCity ? escapeHTML(weatherCity) : "Ort in Wetter-App festlegen") + "</div></div></div><div class='desktop-widget-sub' data-widget-weather-description>Wetter wird geladen …</div>";
+        }
+
+        card.innerHTML = "<button class='desktop-widget-remove' type='button' title='Widget entfernen' aria-label='Widget entfernen'>×</button><h3>" + widget.icon + " " + widget.title + "</h3>" + body;
+        card.querySelector(".desktop-widget-remove").addEventListener("click", () => removeDesktopWidget(id));
+        card.addEventListener("dragstart", event => {
+            event.dataTransfer.setData("text/plain", "thyqora-widget:" + id);
+            event.dataTransfer.effectAllowed = "move";
+        });
+        card.addEventListener("dragover", event => event.preventDefault());
+        card.addEventListener("drop", event => {
+            event.preventDefault();
+            event.stopPropagation();
+            const dragged = event.dataTransfer.getData("text/plain").replace("thyqora-widget:", "");
+            if (dragged && dragged !== id) moveDesktopWidget(dragged, id);
+        });
+        layer.appendChild(card);
+    });
+
+    desktop.appendChild(layer);
+
+    const center = document.createElement("div");
+    center.className = "widget-center";
+    center.id = "widgetCenter";
+    center.innerHTML = "<h3>▦ Desktop-Widgets</h3><p>Füge Widgets hinzu oder entferne sie. Ziehe Widgets auf dem Desktop zum Umordnen.</p><div class='widget-center-list' id='widgetCenterList'></div>";
+    desktop.appendChild(center);
+    renderWidgetCenterList();
+    updateDesktopWidgetClock();
+    if (desktopWidgets.includes("weather")) loadDesktopWeatherWidget();
+}
+
+function renderWidgetCenterList() {
+    const list = document.getElementById("widgetCenterList");
+    if (!list) return;
+    list.innerHTML = "";
+    Object.entries(WIDGET_CATALOG).forEach(([id, widget]) => {
+        const available = isWidgetAvailable(id);
+        const active = desktopWidgets.includes(id);
+        const row = document.createElement("div");
+        row.className = "widget-center-row";
+        row.innerHTML = "<div class='widget-center-meta'><strong>" + widget.icon + " " + widget.title + "</strong><small>" + widget.description + (widget.requiresApp && !available ? " · Wetter-App benötigt" : "") + "</small></div><button type='button' " + (!available || active ? "disabled" : "") + ">" + (active ? "Hinzugefügt" : "Hinzufügen") + "</button>";
+        row.querySelector("button").addEventListener("click", () => addDesktopWidget(id));
+        list.appendChild(row);
+    });
+}
+
+function toggleWidgetCenter() {
+    const center = document.getElementById("widgetCenter");
+    if (!center) return;
+    const open = center.style.display !== "block";
+    center.style.display = open ? "block" : "none";
+    if (open) renderWidgetCenterList();
+}
+
+function addDesktopWidget(id) {
+    if (!isWidgetAvailable(id)) {
+        notify("Widget nicht verfügbar", "Für das Wetter-Widget muss die Wetter-App installiert sein.");
+        return;
+    }
+    if (desktopWidgets.includes(id)) return;
+    desktopWidgets.push(id);
+    renderDesktop();
+    saveDesktopWidgets();
+    const center = document.getElementById("widgetCenter");
+    if (center) center.style.display = "block";
+    notify("Widget hinzugefügt", WIDGET_CATALOG[id].title + " wurde auf dem Desktop hinzugefügt.");
+}
+
+function removeDesktopWidget(id) {
+    desktopWidgets = desktopWidgets.filter(widgetId => widgetId !== id);
+    renderDesktop();
+    saveDesktopWidgets();
+}
+
+function moveDesktopWidget(draggedId, targetId) {
+    const from = desktopWidgets.indexOf(draggedId);
+    const to = desktopWidgets.indexOf(targetId);
+    if (from < 0 || to < 0 || from === to) return;
+    desktopWidgets.splice(from, 1);
+    desktopWidgets.splice(to, 0, draggedId);
+    renderDesktop();
+    saveDesktopWidgets();
+}
+
+function updateDesktopWidgetClock() {
+    const now = new Date();
+    const clock = document.querySelector("[data-widget-clock]");
+    const date = document.querySelector("[data-widget-date]");
+    if (clock) clock.textContent = now.toLocaleTimeString("de-DE");
+    if (date) date.textContent = now.toLocaleDateString("de-DE", {weekday:"long", day:"2-digit", month:"long"});
+}
+
+async function loadDesktopWeatherWidget() {
+    const temp = document.querySelector("[data-widget-weather-temp]");
+    const icon = document.querySelector("[data-widget-weather-icon]");
+    const placeLabel = document.querySelector("[data-widget-weather-place]");
+    const descriptionLabel = document.querySelector("[data-widget-weather-description]");
+    if (!temp || !icon || !placeLabel || !descriptionLabel || !isAppInstalled("weather")) return;
+    if (!weatherCity) {
+        temp.textContent = "—";
+        placeLabel.textContent = "Ort festlegen";
+        descriptionLabel.textContent = "Öffne die Wetter-App und suche eine Stadt.";
+        return;
+    }
+
+    const request = ++widgetWeatherRequest;
+    descriptionLabel.textContent = "Wetter wird geladen …";
+    try {
+        const geoResponse = await fetch("https://geocoding-api.open-meteo.com/v1/search?name=" + encodeURIComponent(weatherCity) + "&count=1&language=de&format=json");
+        if (!geoResponse.ok) throw new Error("Wetterdaten nicht erreichbar");
+        const geoData = await geoResponse.json();
+        const place = geoData.results && geoData.results[0];
+        if (!place) throw new Error("Ort nicht gefunden");
+        const params = new URLSearchParams({
+            latitude: place.latitude,
+            longitude: place.longitude,
+            current: "temperature_2m,weather_code",
+            timezone: "auto"
+        });
+        const response = await fetch("https://api.open-meteo.com/v1/forecast?" + params.toString());
+        if (!response.ok) throw new Error("Wetterdaten nicht erreichbar");
+        const data = await response.json();
+        if (request !== widgetWeatherRequest || !document.querySelector("[data-widget-weather-temp]")) return;
+        const weather = weatherDescription(data.current.weather_code);
+        temp.textContent = Math.round(data.current.temperature_2m) + "°";
+        icon.textContent = weather[1];
+        placeLabel.textContent = place.name + (place.admin1 ? ", " + place.admin1 : "");
+        descriptionLabel.textContent = weather[0];
+    } catch (error) {
+        if (request === widgetWeatherRequest && descriptionLabel.isConnected) descriptionLabel.textContent = "Wetter momentan nicht verfügbar.";
+    }
 }
 
 function addDesktopShortcut(id) {
@@ -3632,7 +3900,7 @@ function appCenterContent() {
         <div class="system-monitor">
             <div>
                 <h2 style="margin:0">🛍️ App-Center</h2>
-                <p class="monitor-note">Installiere und verwalte deine THYQORA-Apps. Neu in Version 0.7: Taschenrechner, Systemsteuerung und Wetter.</p>
+                <p class="monitor-note">Installiere und verwalte deine THYQORA-Apps. Neu in Version 0.8: Taschenrechner, Systemsteuerung und Wetter.</p>
             </div>
             <h3 class="store-section-title">Installierte Apps</h3>
             <div id="appCenterInstalled" class="store-list"></div>
@@ -3822,7 +4090,7 @@ function runCommand() {
     } else if (command === "about") {
         result = "THYQORA OS – ein browserbasiertes Betriebssystem.";
     } else if (command === "version") {
-        result = "THYQORA OS Version 0.7";
+        result = "THYQORA OS Version 0.8";
     } else if (command === "date") {
         result = new Date().toLocaleDateString("de-DE");
     } else if (command === "time") {
@@ -3832,7 +4100,7 @@ function runCommand() {
     } else if (command === "uptime") {
         result = "Diese Sitzung läuft seit " + formatSessionUptime() + ".";
     } else if (command === "sysinfo" || command === "system") {
-        result = "THYQORA OS 0.7 | Browser: " + navigator.userAgent +
+        result = "THYQORA OS 0.8 | Browser: " + navigator.userAgent +
             " | " + navigator.hardwareConcurrency + " logische CPU-Kerne" +
             " | Bildschirm: " + screen.width + "x" + screen.height;
     } else if (command === "memory" || command === "ram") {
@@ -3913,6 +4181,8 @@ document.addEventListener("keydown", event => {
     if (event.key === "Escape") {
         document.getElementById("startMenu").style.display = "none";
         document.getElementById("notificationCenter").style.display = "none";
+        const widgetCenter = document.getElementById("widgetCenter");
+        if (widgetCenter) widgetCenter.style.display = "none";
         return;
     }
 
@@ -3958,6 +4228,7 @@ function updateClock() {
             minute: "2-digit"
         }) + "<br>" +
         now.toLocaleDateString("de-DE");
+    updateDesktopWidgetClock();
 }
 
 
@@ -3988,6 +4259,7 @@ checkLogin();
 updateClock();
 
 setInterval(updateClock, 1000);
+setInterval(() => { if (desktopWidgets.includes('weather')) loadDesktopWeatherWidget(); }, 15 * 60 * 1000);
 
 </script>
 
