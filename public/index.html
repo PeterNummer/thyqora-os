@@ -3459,6 +3459,7 @@ function toggleWidgetCenter() {
     const center = document.getElementById("widgetCenter");
     if (!center) return;
     const open = center.style.display !== "block";
+    closeFloatingMenus(open ? "widgets" : "");
     center.style.display = open ? "block" : "none";
     if (open) renderWidgetCenterList();
 }
@@ -3643,7 +3644,19 @@ function setupDesktopInteractions() {
     });
 
     document.addEventListener("pointerdown", event => {
-        if (!event.target.closest("#desktopContextMenu")) hideDesktopMenu();
+        const insideMenu = event.target.closest(
+            "#desktopContextMenu, #startMenu, #notificationCenter, #widgetCenter"
+        );
+        const menuToggle = event.target.closest(
+            ".task-button, .notification-button, #clock"
+        );
+
+        if (!insideMenu && !menuToggle) {
+            hideDesktopMenu();
+            closeFloatingMenus();
+        } else if (!insideMenu && menuToggle) {
+            hideDesktopMenu();
+        }
     });
     document.addEventListener("keydown", event => {
         if (event.key === "Escape") hideDesktopMenu();
@@ -3651,12 +3664,25 @@ function setupDesktopInteractions() {
 }
 
 
+function closeFloatingMenus(except = "") {
+    const menus = [
+        ["start", document.getElementById("startMenu")],
+        ["notifications", document.getElementById("notificationCenter")],
+        ["widgets", document.getElementById("widgetCenter")]
+    ];
+    menus.forEach(([name, element]) => {
+        if (element && name !== except) element.style.display = "none";
+    });
+}
+
 function toggleStart() {
 
     const menu = document.getElementById("startMenu");
+    const shouldOpen = menu.style.display !== "block";
+    closeFloatingMenus(shouldOpen ? "start" : "");
 
     menu.style.display =
-        menu.style.display === "block" ? "none" : "block";
+        shouldOpen ? "block" : "none";
 
     if (menu.style.display === "block") {
 
@@ -3667,7 +3693,6 @@ function toggleStart() {
         document.getElementById("appSearch").focus();
     }
 
-    document.getElementById("notificationCenter").style.display = "none";
 }
 
 
@@ -3726,11 +3751,9 @@ function renderNotifications() {
 function toggleNotifications() {
 
     const center = document.getElementById("notificationCenter");
-
-    center.style.display =
-        center.style.display === "block" ? "none" : "block";
-
-    document.getElementById("startMenu").style.display = "none";
+    const shouldOpen = center.style.display !== "block";
+    closeFloatingMenus(shouldOpen ? "notifications" : "");
+    center.style.display = shouldOpen ? "block" : "none";
 
     renderNotifications();
 }
