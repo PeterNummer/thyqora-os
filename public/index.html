@@ -666,9 +666,14 @@ body.authenticated #authScreen {
 .wallpaper-choice {
     width: 90px;
     height: 60px;
+    min-width: 90px;
+    min-height: 60px;
     border: 2px solid #ffffff50;
     border-radius: 8px;
     cursor: pointer;
+    pointer-events: auto;
+    position: relative;
+    z-index: 2;
 }
 
 .wallpaper-choice.selected {
@@ -1532,7 +1537,7 @@ function designCenterContent() {
         <p>Personalisiere das Aussehen von THYQORA OS. Deine Auswahl wird in deinem Konto gespeichert.</p>
         <h3>Akzentfarbe</h3>
         <div class="wallpaper-options">
-            ${accents.map(([color, name]) => `<button type="button" class="wallpaper-choice" style="background:${color};outline:${(settings.accent || "#1685df") === color ? "3px solid white" : "none"}" title="${name}" aria-label="${name}" onclick="setAccent('${color}')"></button>`).join("")}
+            ${accents.map(([color, name]) => `<button type="button" class="wallpaper-choice accent-choice" data-accent="${color}" style="background-color:${color};outline:${(settings.accent || "#1685df") === color ? "3px solid white" : "none"}" title="${name}" aria-label="${name}"></button>`).join("")}
         </div>
         <h3>Desktop-Hintergrund</h3>
         <div class="wallpaper-options">
@@ -2221,6 +2226,10 @@ function openApp(app) {
         maximized: false,
         previous: null
     };
+
+    win.querySelectorAll(".accent-choice").forEach(button => {
+        button.addEventListener("click", () => setAccent(button.dataset.accent));
+    });
 
     win.querySelector('[data-action="minimize"]').onclick =
         () => minimizeWindow(app);
