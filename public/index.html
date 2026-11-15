@@ -1725,7 +1725,7 @@ function setVolume(value) {
 
 function updateWallpaperSelection() {
 
-    document.querySelectorAll(".wallpaper-choice").forEach(button => {
+    document.querySelectorAll(".wallpaper-choice, .control-wallpaper, .control-accent").forEach(button => {
 
         const isWallpaper = button.dataset.wallpaper !== undefined;
         const isAccent = button.dataset.accent !== undefined;
@@ -2598,7 +2598,7 @@ function calculatorContent() {
 }
 
 function calculateExpression(source) {
-    const compact = String(source).replace(/\s+/g, "");
+    const compact = String(source).replace(/\s+/g, "").replace(/,/g, ".");
     if (!compact) throw new Error("Bitte gib eine Rechnung ein.");
     const tokens = compact.match(/(?:\d+(?:\.\d*)?|\.\d+)|[a-zA-Z]+|[+\-*/^()%]/g) || [];
     if (tokens.join("") !== compact) throw new Error("Ungültiges Zeichen im Ausdruck.");
@@ -2617,26 +2617,28 @@ function calculateExpression(source) {
             value = Number(token);
         } else if (/^[a-zA-Z]+$/.test(token)) {
             const name = token.toLowerCase();
-            if (name === "pi") return Math.PI;
-            if (name === "e") return Math.E;
-            if (name === "ans") return lastCalculatorAnswer;
-            if (take() !== "(") throw new Error("Nach " + name + " wird eine Klammer erwartet.");
-            const argument = expression();
-            if (take() !== ")") throw new Error("Schließende Funktionsklammer fehlt.");
-            const functions = {
-                sin: n => Math.sin(n * Math.PI / 180),
-                cos: n => Math.cos(n * Math.PI / 180),
-                tan: n => Math.tan(n * Math.PI / 180),
-                sqrt: n => Math.sqrt(n),
-                abs: n => Math.abs(n),
-                ln: n => Math.log(n),
-                log: n => Math.log10(n),
-                round: n => Math.round(n),
-                floor: n => Math.floor(n),
-                ceil: n => Math.ceil(n)
-            };
-            if (!functions[name]) throw new Error("Unbekannte Funktion: " + name);
-            value = functions[name](argument);
+            if (name === "pi") value = Math.PI;
+            else if (name === "e") value = Math.E;
+            else if (name === "ans") value = lastCalculatorAnswer;
+            else {
+                if (take() !== "(") throw new Error("Nach " + name + " wird eine Klammer erwartet.");
+                const argument = expression();
+                if (take() !== ")") throw new Error("Schließende Funktionsklammer fehlt.");
+                const functions = {
+                    sin: n => Math.sin(n * Math.PI / 180),
+                    cos: n => Math.cos(n * Math.PI / 180),
+                    tan: n => Math.tan(n * Math.PI / 180),
+                    sqrt: n => Math.sqrt(n),
+                    abs: n => Math.abs(n),
+                    ln: n => Math.log(n),
+                    log: n => Math.log10(n),
+                    round: n => Math.round(n),
+                    floor: n => Math.floor(n),
+                    ceil: n => Math.ceil(n)
+                };
+                if (!functions[name]) throw new Error("Unbekannte Funktion: " + name);
+                value = functions[name](argument);
+            }
         } else {
             throw new Error("Unerwartetes Zeichen: " + token);
         }
@@ -2715,10 +2717,10 @@ function systemControlContent() {
     return "<div class='system-control-app'>" +
         "<div class='system-control-heading'><h2>🛠️ Systemsteuerung</h2><p>Die wichtigsten Einstellungen von THYQORA OS an einem Ort.</p></div>" +
         "<section class='control-section'><h3>🎨 Akzentfarbe</h3><div class='control-accent-list'>" +
-        accents.map(([color,name]) => "<button type='button' class='control-accent " + (settings.accent.toLowerCase() === color ? "selected" : "") + "' style='--choice:" + color + "' title='" + name + "' aria-label='" + name + "' onclick=\"setAccent('" + color + "')\"></button>").join("") +
+        accents.map(([color,name]) => "<button type='button' class='control-accent " + (settings.accent.toLowerCase() === color ? "selected" : "") + "' data-accent='" + color + "' style='--choice:" + color + "' title='" + name + "' aria-label='" + name + "' onclick=\"setAccent('" + color + "')\"></button>").join("") +
         "</div></section>" +
         "<section class='control-section'><h3>🖼️ Desktop-Hintergrund</h3><div class='control-wallpaper-list'>" +
-        Object.entries(wallpapers).map(([number,background]) => "<button type='button' class='control-wallpaper " + (Number(settings.background) === Number(number) ? "selected" : "") + "' style='background:" + background + "' aria-label='Hintergrund " + number + "' title='Hintergrund " + number + "' onclick='setBackground(" + number + ")'></button>").join("") +
+        Object.entries(wallpapers).map(([number,background]) => "<button type='button' class='control-wallpaper " + (Number(settings.background) === Number(number) ? "selected" : "") + "' data-wallpaper='" + number + "' style='background:" + background + "' aria-label='Hintergrund " + number + "' title='Hintergrund " + number + "' onclick='setBackground(" + number + ")'></button>").join("") +
         "</div></section>" +
         "<section class='control-section'><h3>🔊 THYQORA-Lautstärke</h3><div class='control-volume-row'><input class='system-control-volume' type='range' min='0' max='100' value='" + settings.volume + "' oninput='setVolume(this.value)' aria-label='THYQORA-Lautstärke'><strong class='system-control-volume-value'>" + settings.volume + "%</strong></div><p class='monitor-note'>Dieser Regler speichert die Lautstärke-Einstellung in THYQORA OS. Er verändert nicht die Windows-Lautstärke.</p></section>" +
         "<section class='control-section control-account'><h3>👤 Konto und System</h3><div><span>Angemeldet als</span><strong>" + escapeHTML(currentUsername || "Unbekannt") + "</strong></div><div><span>Version</span><strong>THYQORA OS 0.7</strong></div><div><span>Cloud-Speicher</span><strong>" + (cloudReady ? "Verbunden" : "Nicht verbunden") + "</strong></div><button type='button' onclick='logout()'>Abmelden</button></section></div>";
@@ -3866,7 +3868,9 @@ function runCommand() {
         const target = args.toLowerCase();
         const aliases = {systemmonitor:"monitor", monitor:"monitor", taskmanager:"taskmanager",
             "task-manager":"taskmanager", appcenter:"appcenter", "app-center":"appcenter",
-            browser:"browser", einstellungen:"settings", settings:"settings", terminal:"terminal", about:"about"};
+            browser:"browser", einstellungen:"settings", settings:"settings", terminal:"terminal", about:"about",
+            rechner:"calculator", calculator:"calculator", taschenrechner:"calculator",
+            systemsteuerung:"systemcontrol", systemcontrol:"systemcontrol", wetter:"weather", weather:"weather"};
         const app = aliases[target];
         if (app && apps[app]) {
             result = "Öffne " + apps[app].title + " …";
