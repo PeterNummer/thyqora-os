@@ -508,6 +508,14 @@ body.authenticated #authScreen {
 .browser-view { position:relative; flex:1 1 auto; min-height:0; height:100%; background:#fff; border:1px solid #ffffff30; border-radius:8px; overflow:hidden; }
 .browser-view iframe { width:100%; height:100%; min-height:100%; display:block; border:0; background:white; }
 .browser-status { flex:0 0 auto; margin:0; min-height:18px; color:#a9bfd8; font-size:12px; }
+.game-center { display:flex; flex-direction:column; gap:10px; height:100%; min-height:0; }
+.game-add-row { display:flex; gap:7px; flex-wrap:wrap; }
+.game-add-row input { flex:1 1 180px; min-width:120px; margin:0; max-width:none; }
+.game-list { display:flex; flex-wrap:wrap; gap:7px; max-height:100px; overflow:auto; }
+.game-chip { display:flex; gap:5px; align-items:center; }
+.game-frame-wrap { position:relative; flex:1; min-height:180px; background:#07111f; border:1px solid #ffffff30; border-radius:8px; overflow:hidden; }
+.game-frame-wrap iframe { width:100%; height:100%; min-height:180px; display:block; border:0; background:#fff; }
+.game-help { margin:0; color:#a9bfd8; font-size:12px; line-height:1.45; }
 
 .system-monitor { display:flex; flex-direction:column; gap:12px; }
 .monitor-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; }
@@ -939,7 +947,8 @@ const apps = {
     settings: {title:"Einstellungen",icon:"⚙️"},
     terminal: {title:"Terminal",icon:"⌨️"},
     about: {title:"Über THYQORA",icon:"💻"},
-    designcenter: {title:"Design-Center",icon:"🎨"}
+    designcenter: {title:"Design-Center",icon:"🎨"},
+    gamecenter: {title:"Game-Center",icon:"🎮"}
 };
 
 // System-Apps bleiben immer installiert. Optionale Apps werden pro Konto gespeichert.
@@ -959,9 +968,15 @@ const APP_CATALOG = {
         title: "Design-Center",
         icon: "🎨",
         description: "Passe Akzentfarben und Desktop-Hintergründe an."
+    },
+    gamecenter: {
+        title: "Game-Center",
+        icon: "🎮",
+        description: "Füge Webspiele hinzu und spiele sie direkt in THYQORA OS."
     }
 };
 let installedApps = [...CORE_APPS];
+let savedGames = [];
 const DEFAULT_DESKTOP_SHORTCUTS = ["taskmanager", "appcenter", "browser", "settings", "terminal", "trash"];
 let desktopShortcuts = [...DEFAULT_DESKTOP_SHORTCUTS];
 let selectedDesktopApp = null;
@@ -1129,6 +1144,11 @@ async function loadCloudSettings() {
         installedApps = Array.isArray(loadedApps)
             ? [...new Set([...CORE_APPS, ...loadedApps.filter(id => Object.prototype.hasOwnProperty.call(APP_CATALOG, id))])]
             : [...CORE_APPS];
+
+        const loadedGames = readValue("thyqoraGames");
+        savedGames = Array.isArray(loadedGames)
+            ? loadedGames.filter(game => game && typeof game.name === "string" && typeof game.url === "string" && game.url.startsWith("https://"))
+            : [];
 
         const loadedShortcuts = readValue("thyqoraDesktopShortcuts");
         desktopShortcuts = Array.isArray(loadedShortcuts)
@@ -2122,6 +2142,119 @@ function emptyTrash() {
    APPS UND FENSTER
 ===================================== */
 
+function gameCenterContent() {
+    return `
+        <div class="game-center">
+            <div>
+                <h2 style="margin:0">🎮 Game-Center</h2>
+                <p class="game-help">Füge ein Webspiel per HTTPS-Adresse hinzu. Es wird direkt hier im Fenster geöffnet.</p>
+            </div>
+            <div class="game-add-row">
+                <input id="gameNameInput" type="text" maxlength="40" placeholder="Spielname">
+                <input id="gameUrlInput" type="url" placeholder="https://spielseite.example">
+                <button type="button" onclick="addGame()">Hinzufügen</button>
+            </div>
+            <div id="gameList" class="game-list"></div>
+            <div class="game-frame-wrap">
+                <iframe id="gameFrame" title="Spiel in THYQORA OS" src="about:blank"
+                        allow="fullscreen; gamepad" allowfullscreen
+                        referrerpolicy="strict-origin-when-cross-origin"></iframe>
+            </div>
+            <p class="game-help" id="gameStatus">Wähle ein Spiel aus. Manche Websites blockieren die Einbettung; solche Spiele können hier leider nicht gestartet werden.</p>
+        </div>
+    `;
+}
+
+function saveGames() {
+    return queueSave("thyqoraGames", savedGames);
+}
+
+function renderGameCenter() {
+    const list = document.getElementById("gameList");
+    if (!list) return;
+    list.innerHTML = "";
+
+    if (!savedGames.length) {
+        list.innerHTML = '<span class="game-help">Noch keine Spiele hinzugefügt.</span>';
+        return;
+    }
+
+    savedGames.forEach((game, index) => {
+        const chip = document.createElement("div");
+        chip.className = "game-chip";
+        const play = document.createElement("button");
+        play.type = "button";
+        play.textContent = "▶ " + game.name;
+        play.title = "Im Game-Center starten";
+        play.onclick = () => launchGame(index);
+        const remove = document.createElement("button");
+        remove.type = "button";
+        remove.textContent = "×";
+        remove.title = "Spiel entfernen";
+        remove.onclick = () => removeGame(index);
+        chip.append(play, remove);
+        list.appendChild(chip);
+    });
+}
+
+async function addGame() {
+    const nameInput = document.getElementById("gameNameInput");
+    const urlInput = document.getElementById("gameUrlInput");
+    if (!nameInput || !urlInput) return;
+
+    const name = nameInput.value.trim();
+    let url;
+    try {
+        url = new URL(urlInput.value.trim());
+    } catch {
+        notify("Ungültige Adresse", "Bitte gib eine vollständige HTTPS-Adresse ein.");
+        return;
+    }
+
+    if (url.protocol !== "https:") {
+        notify("Nur HTTPS erlaubt", "Spiele müssen über eine sichere HTTPS-Adresse eingebunden werden.");
+        return;
+    }
+    if (!name) {
+        notify("Spielname fehlt", "Bitte gib dem Spiel einen Namen.");
+        return;
+    }
+    if (savedGames.some(game => game.url === url.href)) {
+        notify("Spiel bereits vorhanden", "Diese Adresse ist schon im Game-Center gespeichert.");
+        return;
+    }
+
+    savedGames.push({ id: createId(), name, url: url.href });
+    await saveGames();
+    nameInput.value = "";
+    urlInput.value = "";
+    renderGameCenter();
+    launchGame(savedGames.length - 1);
+    notify("Spiel hinzugefügt", name + " wurde im Game-Center gespeichert.");
+}
+
+function launchGame(index) {
+    const game = savedGames[index];
+    const frame = document.getElementById("gameFrame");
+    const status = document.getElementById("gameStatus");
+    if (!game || !frame) return;
+    frame.src = game.url;
+    if (status) status.textContent = game.name + " wird im THYQORA-Fenster geladen. Falls die Seite leer bleibt, verbietet sie möglicherweise die Einbettung.";
+}
+
+async function removeGame(index) {
+    const game = savedGames[index];
+    if (!game) return;
+    savedGames.splice(index, 1);
+    const frame = document.getElementById("gameFrame");
+    const status = document.getElementById("gameStatus");
+    if (frame) frame.src = "about:blank";
+    if (status) status.textContent = "Wähle ein Spiel aus.";
+    await saveGames();
+    renderGameCenter();
+    notify("Spiel entfernt", game.name + " wurde aus dem Game-Center entfernt.");
+}
+
 function getAppContent(app) {
 
     if (app === "monitor") {
@@ -2137,6 +2270,11 @@ function getAppContent(app) {
     if (app === "appcenter") {
         setTimeout(renderAppCenter, 0);
         return appCenterContent();
+    }
+
+    if (app === "gamecenter") {
+        setTimeout(renderGameCenter, 0);
+        return gameCenterContent();
     }
 
     if (app === "settings") return settingsContent();
