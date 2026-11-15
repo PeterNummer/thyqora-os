@@ -515,11 +515,13 @@ body.authenticated #authScreen {
 .game-tile span { font-size:22px; }
 .game-tile strong { font-size:13px; }
 .game-tile small { color:#b9c8dd; font-size:10px; }
-.game-stage { display:flex; flex:1 1 0; flex-direction:column; min-height:0; overflow:auto; padding:8px; background:#07111f80; border:1px solid #ffffff20; border-radius:9px; }
+.game-stage { position:relative; display:flex; flex:1 1 0; flex-direction:column; min-height:0; overflow:auto; padding:8px; background:#07111f80; border:1px solid #ffffff20; border-radius:9px; }
 .game-stage:has(.external-game-frame) { overflow:hidden; }
 .game-stage-toolbar { display:flex; justify-content:flex-end; flex:0 0 auto; }
 .game-stage-toolbar button { margin:0 0 4px !important; padding:7px 11px !important; }
 .external-game-frame { display:block; flex:1 1 auto; width:100%; height:100%; min-height:0; border:0; border-radius:8px; background:#07111f; }
+.fullscreen-exit-button { display:none; }
+.game-stage:fullscreen .fullscreen-exit-button { display:block; position:absolute; top:14px; right:14px; z-index:20; margin:0 !important; padding:10px 15px !important; background:#b42332 !important; color:white; box-shadow:0 2px 12px #0009; }
 .game-stage:fullscreen { width:100vw; height:100vh; max-height:100vh; padding:12px; border:0; border-radius:0; background:#07111f; }
 .game-stage:fullscreen .external-game-frame { flex:1 1 auto; min-height:0; height:100%; }
 .game-credit a { color:#70bdff; }
@@ -2206,6 +2208,18 @@ function gameCenterContent() {
     `;
 }
 
+function addFullscreenExitButton(stage) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "fullscreen-exit-button";
+    button.textContent = "✕ Vollbild beenden";
+    button.setAttribute("aria-label", "Vollbildmodus beenden");
+    button.onclick = () => {
+        if (document.fullscreenElement) document.exitFullscreen?.();
+    };
+    stage.appendChild(button);
+}
+
 function toggleGameFullscreen() {
     const stage = document.getElementById("gameStage");
     if (!stage) return;
@@ -2267,6 +2281,7 @@ function launchExternalGame(id) {
     note.className = "game-help";
     note.textContent = "Das Spiel wird von der Website geladen. Wenn es nicht erscheint, kann die Website das Einbetten vorübergehend verhindern.";
     stage.append(heading, frame, credit, note);
+    addFullscreenExitButton(stage);
 }
 let snakeTimer = null;
 let snakeState = null;
@@ -2300,6 +2315,7 @@ function launchBuiltinGame(name) {
                 <p class="game-help" id="snakeStatus">Bereit? Drücke auf Start.</p>
             </div>`;
         drawSnake();
+        addFullscreenExitButton(stage);
         return;
     }
 
@@ -2316,6 +2332,7 @@ function launchBuiltinGame(name) {
             </div>`;
         let first = null, locked = false, pairs = 0;
         const grid = document.getElementById("memoryGrid");
+        addFullscreenExitButton(stage);
         cards.forEach((symbol, index) => {
             const card = document.createElement("button");
             card.type = "button";
@@ -2433,6 +2450,7 @@ function stepSnake() {
         snakeTimer = null;
         const status = document.getElementById("snakeStatus");
         if (status) status.textContent = "Spiel vorbei! Punkte: " + game.score + ". Drücke Neu starten.";
+        addFullscreenExitButton(stage);
         return;
     }
     game.body.unshift(head);
