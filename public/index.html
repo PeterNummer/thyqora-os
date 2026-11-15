@@ -494,7 +494,8 @@ body.authenticated #authScreen {
 }
 
 /* THYQORA BROWSER */
-.window-content:has(.thyqora-browser) {
+.window-content:has(.thyqora-browser),
+.window-content:has(.game-center) {
     display: flex;
     flex-direction: column;
     min-height: 0;
@@ -508,14 +509,19 @@ body.authenticated #authScreen {
 .browser-view { position:relative; flex:1 1 auto; min-height:0; height:100%; background:#fff; border:1px solid #ffffff30; border-radius:8px; overflow:hidden; }
 .browser-view iframe { width:100%; height:100%; min-height:100%; display:block; border:0; background:white; }
 .browser-status { flex:0 0 auto; margin:0; min-height:18px; color:#a9bfd8; font-size:12px; }
-.game-center { display:flex; flex-direction:column; gap:10px; height:100%; min-height:0; }
-.game-presets { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:9px; }
-.game-tile { display:flex; flex-direction:column; align-items:flex-start; gap:5px; min-height:112px; padding:12px !important; margin:0 !important; text-align:left; background:#ffffff10 !important; }
-.game-tile span { font-size:25px; }
-.game-tile strong { font-size:14px; }
-.game-tile small { color:#b9c8dd; font-size:11px; }
-.game-stage { flex:1; min-height:220px; overflow:auto; padding:10px; background:#07111f80; border:1px solid #ffffff20; border-radius:9px; }
-.external-game-frame { display:block; width:100%; height:clamp(300px,55vh,560px); border:0; border-radius:8px; background:#07111f; }
+.game-center { display:flex; flex:1 1 auto; flex-direction:column; gap:7px; height:100%; min-height:0; overflow:hidden; }
+.game-presets { display:grid; grid-auto-flow:column; grid-auto-columns:minmax(130px,1fr); grid-template-rows:1fr; gap:8px; overflow-x:auto; overflow-y:hidden; flex:0 0 auto; padding:2px 2px 7px; }
+.game-tile { display:flex; flex-direction:column; align-items:flex-start; justify-content:center; gap:4px; min-height:78px; max-height:88px; padding:9px !important; margin:0 !important; text-align:left; background:#ffffff10 !important; }
+.game-tile span { font-size:22px; }
+.game-tile strong { font-size:13px; }
+.game-tile small { color:#b9c8dd; font-size:10px; }
+.game-stage { display:flex; flex:1 1 0; flex-direction:column; min-height:0; overflow:auto; padding:8px; background:#07111f80; border:1px solid #ffffff20; border-radius:9px; }
+.game-stage:has(.external-game-frame) { overflow:hidden; }
+.game-stage-toolbar { display:flex; justify-content:flex-end; flex:0 0 auto; }
+.game-stage-toolbar button { margin:0 0 4px !important; padding:7px 11px !important; }
+.external-game-frame { display:block; flex:1 1 auto; width:100%; height:100%; min-height:0; border:0; border-radius:8px; background:#07111f; }
+.game-stage:fullscreen { width:100vw; height:100vh; max-height:100vh; padding:12px; border:0; border-radius:0; background:#07111f; }
+.game-stage:fullscreen .external-game-frame { flex:1 1 auto; min-height:0; height:100%; }
 .game-credit a { color:#70bdff; }
 .builtin-game { display:flex; flex-direction:column; align-items:center; gap:8px; text-align:center; }
 .builtin-game h3 { margin:2px 0; }
@@ -2190,11 +2196,32 @@ function gameCenterContent() {
                     </button>
                 `).join("")}
             </div>
+            <div class="game-stage-toolbar">
+                <button type="button" onclick="toggleGameFullscreen()">⛶ Vollbild</button>
+            </div>
             <div class="game-stage" id="gameStage">
                 <div class="empty-state">Wähle oben ein Spiel aus, um loszulegen.</div>
             </div>
         </div>
     `;
+}
+
+function toggleGameFullscreen() {
+    const stage = document.getElementById("gameStage");
+    if (!stage) return;
+
+    if (document.fullscreenElement) {
+        document.exitFullscreen?.();
+        return;
+    }
+
+    if (stage.requestFullscreen) {
+        stage.requestFullscreen().catch(() => {
+            notify("Vollbild nicht verfügbar", "Dein Browser konnte den Vollbildmodus nicht starten.");
+        });
+    } else {
+        notify("Vollbild nicht unterstützt", "Dein Browser unterstützt den Vollbildmodus hier nicht.");
+    }
 }
 
 function launchExternalGame(id) {
