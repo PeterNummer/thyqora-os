@@ -514,7 +514,9 @@ body.authenticated #authScreen {
 .game-tile span { font-size:25px; }
 .game-tile strong { font-size:14px; }
 .game-tile small { color:#b9c8dd; font-size:11px; }
-.game-stage { flex:1; min-height:180px; overflow:auto; padding:10px; background:#07111f80; border:1px solid #ffffff20; border-radius:9px; }
+.game-stage { flex:1; min-height:220px; overflow:auto; padding:10px; background:#07111f80; border:1px solid #ffffff20; border-radius:9px; }
+.external-game-frame { display:block; width:100%; height:clamp(300px,55vh,560px); border:0; border-radius:8px; background:#07111f; }
+.game-credit a { color:#70bdff; }
 .builtin-game { display:flex; flex-direction:column; align-items:center; gap:8px; text-align:center; }
 .builtin-game h3 { margin:2px 0; }
 #snakeCanvas { width:min(360px,100%); height:auto; aspect-ratio:1; border:1px solid #ffffff40; border-radius:6px; image-rendering:pixelated; }
@@ -2158,23 +2160,35 @@ function emptyTrash() {
    APPS UND FENSTER
 ===================================== */
 
+const externalGameCatalog = [
+    {id:"orbit-brake",name:"Orbit Brake",icon:"🪐",description:"Ein Geschicklichkeitsspiel mit Schwerkraft.",url:"https://www.uploadarcade.com/embed/orbit-brake",page:"https://www.uploadarcade.com/games/orbit-brake"},
+    {id:"parcel-panic",name:"Parcel Panic",icon:"📦",description:"Sortiere Pakete, bevor das Band vollläuft.",url:"https://www.uploadarcade.com/embed/parcel-panic",page:"https://www.uploadarcade.com/games/parcel-panic"},
+    {id:"lantern-lines",name:"Lantern Lines",icon:"🏮",description:"Verbinde passende Punkte ohne Kreuzungen.",url:"https://www.uploadarcade.com/embed/lantern-lines",page:"https://www.uploadarcade.com/games/lantern-lines"},
+    {id:"cloud-courier",name:"Cloud Courier",icon:"☁️",description:"Halte einen kleinen Kurier in der Luft.",url:"https://www.uploadarcade.com/embed/cloud-courier",page:"https://www.uploadarcade.com/games/cloud-courier"},
+    {id:"signal-garden",name:"Signal Garden",icon:"🌱",description:"Merke dir Muster und wiederhole sie.",url:"https://www.uploadarcade.com/embed/signal-garden",page:"https://www.uploadarcade.com/games/signal-garden"},
+    {id:"color-relay",name:"Color Relay",icon:"🎨",description:"Reagiere schnell und passe die Farben an.",url:"https://www.uploadarcade.com/embed/color-relay",page:"https://www.uploadarcade.com/games/color-relay"}
+];
+
 function gameCenterContent() {
     return `
         <div class="game-center">
             <div>
                 <h2 style="margin:0">🎮 Game-Center</h2>
-                <p class="game-help">Wähle eines der vorinstallierten Spiele aus. Alle Spiele laufen direkt in THYQORA OS – ohne externe Webseiten oder Adressen.</p>
+                <p class="game-help">Wähle ein Spiel aus. Die eigenen THYQORA-Spiele und externe HTML5-Spiele starten direkt in diesem Fenster.</p>
             </div>
+            <h3 class="store-section-title" style="margin:2px 0">THYQORA-Spiele</h3>
             <div class="game-presets">
-                <button type="button" class="game-tile" onclick="launchBuiltinGame('snake')">
-                    <span>🐍</span><strong>Snake</strong><small>Iss Äpfel und werde länger.</small>
-                </button>
-                <button type="button" class="game-tile" onclick="launchBuiltinGame('memory')">
-                    <span>🧠</span><strong>Memory</strong><small>Finde alle Kartenpaare.</small>
-                </button>
-                <button type="button" class="game-tile" onclick="launchBuiltinGame('tictactoe')">
-                    <span>⭕</span><strong>Tic-Tac-Toe</strong><small>Spiele zu zweit auf einem Feld.</small>
-                </button>
+                <button type="button" class="game-tile" onclick="launchBuiltinGame('snake')"><span>🐍</span><strong>Snake</strong><small>Iss Äpfel und werde länger.</small></button>
+                <button type="button" class="game-tile" onclick="launchBuiltinGame('memory')"><span>🧠</span><strong>Memory</strong><small>Finde alle Kartenpaare.</small></button>
+                <button type="button" class="game-tile" onclick="launchBuiltinGame('tictactoe')"><span>⭕</span><strong>Tic-Tac-Toe</strong><small>Spiele zu zweit auf einem Feld.</small></button>
+            </div>
+            <h3 class="store-section-title" style="margin:2px 0">Weitere Spiele aus dem Internet</h3>
+            <div class="game-presets">
+                ${externalGameCatalog.map(game => `
+                    <button type="button" class="game-tile" onclick="launchExternalGame('${game.id}')">
+                        <span>${game.icon}</span><strong>${game.name}</strong><small>${game.description}</small>
+                    </button>
+                `).join("")}
             </div>
             <div class="game-stage" id="gameStage">
                 <div class="empty-state">Wähle oben ein Spiel aus, um loszulegen.</div>
@@ -2183,6 +2197,43 @@ function gameCenterContent() {
     `;
 }
 
+function launchExternalGame(id) {
+    if (snakeTimer) {
+        clearInterval(snakeTimer);
+        snakeTimer = null;
+    }
+    document.onkeydown = null;
+    snakeState = null;
+
+    const game = externalGameCatalog.find(item => item.id === id);
+    const stage = document.getElementById("gameStage");
+    if (!game || !stage) return;
+
+    stage.innerHTML = "";
+    const heading = document.createElement("h3");
+    heading.textContent = game.icon + " " + game.name;
+    const frame = document.createElement("iframe");
+    frame.className = "external-game-frame";
+    frame.title = game.name + " – eingebettetes Spiel";
+    frame.src = game.url;
+    frame.allow = "fullscreen; autoplay; gamepad";
+    frame.allowFullscreen = true;
+    frame.loading = "lazy";
+    frame.referrerPolicy = "strict-origin-when-cross-origin";
+    const credit = document.createElement("p");
+    credit.className = "game-help game-credit";
+    credit.append("Externes Spiel von Upload Arcade · ");
+    const link = document.createElement("a");
+    link.href = game.page;
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    link.textContent = "Spielseite und Anbieter öffnen";
+    credit.appendChild(link);
+    const note = document.createElement("p");
+    note.className = "game-help";
+    note.textContent = "Das Spiel wird von der Website geladen. Wenn es nicht erscheint, kann die Website das Einbetten vorübergehend verhindern.";
+    stage.append(heading, frame, credit, note);
+}
 let snakeTimer = null;
 let snakeState = null;
 
