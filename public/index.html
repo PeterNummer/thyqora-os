@@ -2248,7 +2248,7 @@ function launchExternalGame(id) {
     heading.textContent = game.icon + " " + game.name;
     const frame = document.createElement("iframe");
     frame.className = "external-game-frame";
-    frame.title = game.name + " – eingebettetes Spiel";
+    frame.setAttribute("aria-label", game.name);
     frame.src = game.url;
     frame.allow = "fullscreen; autoplay; gamepad";
     frame.allowFullscreen = true;
