@@ -866,6 +866,7 @@ body.authenticated #authScreen {
 
 const DEFAULT_SETTINGS = {
     background: 1,
+    accent: "#1685df",
     volume: 70
 };
 
@@ -919,7 +920,8 @@ const apps = {
     browser: {title:"Browser",icon:"🌐"},
     settings: {title:"Einstellungen",icon:"⚙️"},
     terminal: {title:"Terminal",icon:"⌨️"},
-    about: {title:"Über THYQORA",icon:"💻"}
+    about: {title:"Über THYQORA",icon:"💻"},
+    designcenter: {title:"Design-Center",icon:"🎨"}
 };
 
 // System-Apps bleiben immer installiert. Optionale Apps werden pro Konto gespeichert.
@@ -934,6 +936,11 @@ const APP_CATALOG = {
         title: "Über THYQORA",
         icon: "💻",
         description: "Zeigt Informationen über THYQORA OS und dein Konto."
+    },
+    designcenter: {
+        title: "Design-Center",
+        icon: "🎨",
+        description: "Passe Akzentfarben und Desktop-Hintergründe an."
     }
 };
 let installedApps = [...CORE_APPS];
@@ -1494,7 +1501,7 @@ function applySettings() {
 
     document.documentElement.style.setProperty(
         "--accent",
-        "#1685df"
+        settings.accent || "#1685df"
     );
 
     const volume = document.getElementById("volumeSlider");
@@ -1504,6 +1511,35 @@ function applySettings() {
     }
 
     updateWallpaperSelection();
+}
+
+function setAccent(color) {
+    const allowed = ["#1685df", "#8b5cf6", "#10b981", "#f59e0b", "#ef4444", "#ec4899", "#06b6d4"];
+    if (!allowed.includes(color)) return;
+    settings.accent = color;
+    applySettings();
+    saveSettings();
+    notify("Akzentfarbe geändert", "Deine Design-Einstellungen wurden gespeichert.");
+}
+
+function designCenterContent() {
+    const accents = [
+        ["#1685df", "Blau"], ["#8b5cf6", "Violett"], ["#10b981", "Grün"],
+        ["#f59e0b", "Orange"], ["#ef4444", "Rot"], ["#ec4899", "Pink"], ["#06b6d4", "Türkis"]
+    ];
+    return `
+        <h2>🎨 Design-Center</h2>
+        <p>Personalisiere das Aussehen von THYQORA OS. Deine Auswahl wird in deinem Konto gespeichert.</p>
+        <h3>Akzentfarbe</h3>
+        <div class="wallpaper-options">
+            ${accents.map(([color, name]) => `<button type="button" class="wallpaper-choice" style="background:${color};outline:${(settings.accent || "#1685df") === color ? "3px solid white" : "none"}" title="${name}" aria-label="${name}" onclick="setAccent('${color}')"></button>`).join("")}
+        </div>
+        <h3>Desktop-Hintergrund</h3>
+        <div class="wallpaper-options">
+            ${Object.entries(wallpapers).map(([number, background]) => `<button type="button" class="wallpaper-choice" data-wallpaper="${number}" style="background:${background}" title="Hintergrund ${number}" onclick="setBackground(${number})"></button>`).join("")}
+        </div>
+        <p class="monitor-note">Die Einstellungen gelten auch nach dem erneuten Anmelden.</p>
+    `;
 }
 
 function setBackground(number) {
@@ -2078,6 +2114,8 @@ function getAppContent(app) {
     }
 
     if (app === "settings") return settingsContent();
+
+    if (app === "designcenter") return designCenterContent();
 
     if (app === "browser") {
         return `
