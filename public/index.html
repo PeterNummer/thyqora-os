@@ -2717,7 +2717,7 @@ function systemControlContent() {
     return "<div class='system-control-app'>" +
         "<div class='system-control-heading'><h2>🛠️ Systemsteuerung</h2><p>Die wichtigsten Einstellungen von THYQORA OS an einem Ort.</p></div>" +
         "<section class='control-section'><h3>🎨 Akzentfarbe</h3><div class='control-accent-list'>" +
-        accents.map(([color,name]) => "<button type='button' class='control-accent " + (settings.accent.toLowerCase() === color ? "selected" : "") + "' data-accent='" + color + "' style='--choice:" + color + "' title='" + name + "' aria-label='" + name + "' onclick=\"setAccent('" + color + "')\"></button>").join("") +
+        accents.map(([color,name]) => "<button type='button' class='control-accent " + ((settings.accent || "#1685df").toLowerCase() === color ? "selected" : "") + "' data-accent='" + color + "' style='--choice:" + color + "' title='" + name + "' aria-label='" + name + "' onclick=\"setAccent('" + color + "')\"></button>").join("") +
         "</div></section>" +
         "<section class='control-section'><h3>🖼️ Desktop-Hintergrund</h3><div class='control-wallpaper-list'>" +
         Object.entries(wallpapers).map(([number,background]) => "<button type='button' class='control-wallpaper " + (Number(settings.background) === Number(number) ? "selected" : "") + "' data-wallpaper='" + number + "' style='background:" + background + "' aria-label='Hintergrund " + number + "' title='Hintergrund " + number + "' onclick='setBackground(" + number + ")'></button>").join("") +
@@ -2759,7 +2759,7 @@ async function loadWeatherForecast(saveCity = false) {
     const status = document.getElementById("weatherStatus");
     const result = document.getElementById("weatherResult");
     if (!status || !result) return;
-    const city = (input?.value || weatherCity).trim();
+    const city = (input ? input.value : weatherCity).trim();
     if (!city) { status.textContent = "Bitte gib zuerst eine Stadt ein."; result.innerHTML = ""; return; }
 
     const requestNumber = ++weatherRequestNumber;
