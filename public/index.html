@@ -2482,7 +2482,7 @@ function getAppContent(app) {
         return `
             <div class="terminal">
                 <div id="terminalOutput">
-                    THYQORA TERMINAL [Version 0.5]<br>
+                    THYQORA TERMINAL [Version 0.6]<br>
                     Schreibe help für alle Befehle.<br><br>
                 </div>
 
@@ -2498,7 +2498,7 @@ function getAppContent(app) {
     if (app === "about") {
         return `
             <h2>💻 THYQORA OS</h2>
-            <p>Version 0.5</p>
+            <p>Version 0.6</p>
             <p>Ein eigenes browserbasiertes Betriebssystem.</p>
 
             <h3>Systeminformationen</h3>
@@ -3434,7 +3434,7 @@ function runCommand() {
     } else if (command === "about") {
         result = "THYQORA OS – ein browserbasiertes Betriebssystem.";
     } else if (command === "version") {
-        result = "THYQORA OS Version 0.5";
+        result = "THYQORA OS Version 0.6";
     } else if (command === "date") {
         result = new Date().toLocaleDateString("de-DE");
     } else if (command === "time") {
@@ -3444,7 +3444,7 @@ function runCommand() {
     } else if (command === "uptime") {
         result = "Diese Sitzung läuft seit " + formatSessionUptime() + ".";
     } else if (command === "sysinfo" || command === "system") {
-        result = "THYQORA OS 0.5 | Browser: " + navigator.userAgent +
+        result = "THYQORA OS 0.6 | Browser: " + navigator.userAgent +
             " | " + navigator.hardwareConcurrency + " logische CPU-Kerne" +
             " | Bildschirm: " + screen.width + "x" + screen.height;
     } else if (command === "memory" || command === "ram") {
