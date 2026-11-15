@@ -2236,6 +2236,13 @@ function launchExternalGame(id) {
     const stage = document.getElementById("gameStage");
     if (!game || !stage) return;
 
+    // Direkt im Klick-Ereignis Vollbild anfordern, damit der Browser es erlaubt.
+    if (stage.requestFullscreen && !document.fullscreenElement) {
+        stage.requestFullscreen().catch(() => {
+            notify("Vollbild nicht verfügbar", "Du kannst den Vollbildmodus über die Schaltfläche starten.");
+        });
+    }
+
     stage.innerHTML = "";
     const heading = document.createElement("h3");
     heading.textContent = game.icon + " " + game.name;
@@ -2274,6 +2281,13 @@ function launchBuiltinGame(name) {
 
     const stage = document.getElementById("gameStage");
     if (!stage) return;
+
+    // Auch die eingebauten Spiele starten direkt im Vollbild.
+    if (stage.requestFullscreen && !document.fullscreenElement) {
+        stage.requestFullscreen().catch(() => {
+            notify("Vollbild nicht verfügbar", "Du kannst den Vollbildmodus über die Schaltfläche starten.");
+        });
+    }
 
     if (name === "snake") {
         stage.innerHTML = `
