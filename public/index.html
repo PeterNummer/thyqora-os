@@ -2191,6 +2191,8 @@ function launchBuiltinGame(name) {
         clearInterval(snakeTimer);
         snakeTimer = null;
     }
+    document.onkeydown = null;
+    snakeState = null;
 
     const stage = document.getElementById("gameStage");
     if (!stage) return;
