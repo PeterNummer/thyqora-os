@@ -543,6 +543,64 @@ body.authenticated #authScreen {
 .game-frame-wrap iframe { width:100%; height:100%; min-height:180px; display:block; border:0; background:#fff; }
 .game-help { margin:0; color:#a9bfd8; font-size:12px; line-height:1.45; }
 
+
+/* NEUE APPS 0.7 */
+.calculator-app,.system-control-app,.weather-app { display:flex; flex-direction:column; gap:13px; max-width:100%; }
+.calculator-heading,.weather-header { display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; }
+.calculator-heading h2,.weather-header h2,.system-control-heading h2 { margin:0 0 4px; }
+.calculator-heading p,.weather-header p,.system-control-heading p { margin:0; color:#a9bfd8; font-size:13px; }
+.calculator-mode { color:#83c9ff; font-size:10px; letter-spacing:1px; border:1px solid #ffffff25; padding:6px 8px; border-radius:20px; }
+.calculator-display { padding:13px; background:#050b12; border:1px solid #ffffff20; border-radius:10px; }
+.calculator-display input { width:100%; max-width:100%; margin:0; padding:10px 4px; border:0; outline:0; background:transparent; color:white; font-size:22px; text-align:right; }
+.calculator-display #calculatorResult { min-height:27px; color:#72d5ff; font-size:20px; font-weight:700; text-align:right; overflow-wrap:anywhere; }
+.calculator-keys { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:7px; }
+.calculator-keys button { min-width:0; min-height:43px; margin:0; padding:7px 3px; font-weight:600; background:#1b304d; }
+.calculator-keys .calculator-special { background:#713b42; }
+.calculator-keys .calculator-equals { background:var(--accent); }
+.system-control-app { max-width:820px; }
+.system-control-heading { margin-bottom:2px; }
+.control-section { padding:13px; background:#ffffff0b; border:1px solid #ffffff20; border-radius:10px; }
+.control-section h3 { margin:0 0 12px; font-size:14px; }
+.control-accent-list,.control-wallpaper-list { display:flex; flex-wrap:wrap; gap:12px; }
+.control-accent { width:34px; height:34px; min-width:34px; min-height:34px; margin:0 !important; padding:0 !important; border-radius:50% !important; background:var(--choice) !important; border:2px solid #ffffff55 !important; }
+.control-accent.selected { outline:3px solid var(--choice); outline-offset:3px; }
+.control-wallpaper { width:90px; height:55px; min-width:90px; min-height:55px; margin:0 !important; padding:0 !important; border:2px solid #ffffff55 !important; border-radius:8px !important; }
+.control-wallpaper.selected { outline:3px solid var(--accent); outline-offset:2px; }
+.control-volume-row { display:flex; align-items:center; gap:15px; }
+.control-volume-row input { flex:1; min-width:80px; max-width:none; margin:0; accent-color:var(--accent); }
+.control-volume-row strong { min-width:45px; text-align:right; }
+.control-account { display:flex; flex-direction:column; gap:10px; }
+.control-account h3 { margin-bottom:0; }
+.control-account div { display:flex; justify-content:space-between; gap:12px; padding:8px 0; border-bottom:1px solid #ffffff15; font-size:13px; }
+.control-account div span { color:#a9bfd8; }
+.control-account button { align-self:flex-start; margin:0; background:#8d343c; }
+.weather-search { display:flex; gap:7px; flex-wrap:wrap; }
+.weather-search input { flex:1 1 180px; min-width:100px; max-width:none; margin:0; }
+.weather-search button,.weather-header button { margin:0; }
+.weather-status { min-height:20px; color:#a9bfd8; font-size:12px; }
+.weather-current { padding:18px; border-radius:12px; background:linear-gradient(135deg,#12558a,#10243e); border:1px solid #ffffff25; }
+.weather-place { font-size:15px; color:#d6eaff; }
+.weather-main { display:flex; align-items:center; gap:12px; margin:8px 0 0; }
+.weather-icon { font-size:48px; }
+.weather-main strong { font-size:42px; }
+.weather-description { color:#d6eaff; margin:0 0 15px 4px; }
+.weather-details { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:9px; }
+.weather-details div { padding:9px; background:#07111f55; border-radius:8px; min-width:0; }
+.weather-details small,.weather-details strong { display:block; }
+.weather-details small { color:#b9c8dd; font-size:11px; margin-bottom:5px; }
+.weather-details strong { font-size:13px; overflow-wrap:anywhere; }
+.weather-forecast-title { margin:4px 0 0; font-size:14px; }
+.weather-days { display:grid; grid-template-columns:repeat(7,minmax(78px,1fr)); gap:6px; overflow-x:auto; padding-bottom:5px; }
+.weather-day { display:flex; flex-direction:column; align-items:center; gap:5px; min-width:78px; padding:10px 6px; background:#ffffff0d; border:1px solid #ffffff18; border-radius:8px; text-align:center; font-size:12px; }
+.weather-day-name,.weather-day small { color:#a9bfd8; }
+.weather-day-icon { font-size:23px; }
+.weather-day small { font-size:10px; }
+.weather-credit { margin-top:0; }
+@media(max-width:520px) {
+    .weather-details { grid-template-columns:repeat(2,minmax(0,1fr)); }
+    .calculator-keys button { min-height:39px; }
+}
+
 .system-monitor { display:flex; flex-direction:column; gap:12px; }
 .monitor-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; }
 .monitor-card { padding:13px; background:#ffffff0d; border:1px solid #ffffff20; border-radius:9px; min-width:0; }
@@ -974,7 +1032,10 @@ const apps = {
     terminal: {title:"Terminal",icon:"⌨️"},
     about: {title:"Über THYQORA",icon:"💻"},
     designcenter: {title:"Design-Center",icon:"🎨"},
-    gamecenter: {title:"Game-Center",icon:"🎮"}
+    gamecenter: {title:"Game-Center",icon:"🎮"},
+    calculator: {title:"Taschenrechner",icon:"🧮"},
+    systemcontrol: {title:"Systemsteuerung",icon:"🛠️"},
+    weather: {title:"Wetter",icon:"🌦️"}
 };
 
 // System-Apps bleiben immer installiert. Optionale Apps werden pro Konto gespeichert.
@@ -999,6 +1060,21 @@ const APP_CATALOG = {
         title: "Game-Center",
         icon: "🎮",
         description: "Füge Webspiele hinzu und spiele sie direkt in THYQORA OS."
+    },
+    calculator: {
+        title: "Taschenrechner",
+        icon: "🧮",
+        description: "Rechnet Grundrechenarten und wissenschaftliche Funktionen."
+    },
+    systemcontrol: {
+        title: "Systemsteuerung",
+        icon: "🛠️",
+        description: "Verwaltet Design, Anzeige, Lautstärke und Kontoeinstellungen zentral."
+    },
+    weather: {
+        title: "Wetter",
+        icon: "🌦️",
+        description: "Aktuelles Wetter und eine 7-Tage-Vorhersage für deinen Ort."
     }
 };
 let installedApps = [...CORE_APPS];
@@ -1170,6 +1246,9 @@ async function loadCloudSettings() {
         installedApps = Array.isArray(loadedApps)
             ? [...new Set([...CORE_APPS, ...loadedApps.filter(id => Object.prototype.hasOwnProperty.call(APP_CATALOG, id))])]
             : [...CORE_APPS];
+
+        const loadedWeatherCity = readValue("thyqoraWeatherCity");
+        if (typeof loadedWeatherCity === "string") weatherCity = loadedWeatherCity;
 
         const loadedGames = readValue("thyqoraGames");
         savedGames = Array.isArray(loadedGames)
@@ -1634,6 +1713,12 @@ function setVolume(value) {
     if (label) {
         label.textContent = settings.volume + "%";
     }
+    document.querySelectorAll(".system-control-volume-value").forEach(item => {
+        item.textContent = settings.volume + "%";
+    });
+    document.querySelectorAll(".system-control-volume").forEach(item => {
+        item.value = settings.volume;
+    });
 
     saveSettings();
 }
@@ -2489,6 +2574,246 @@ document.addEventListener("keydown", event => {
     }
 });
 
+
+/* =====================================
+   TASCHENRECHNER
+===================================== */
+
+let lastCalculatorAnswer = 0;
+
+function calculatorContent() {
+    const keys = [
+        ["C","clear"],["⌫","back"],["(","("],[")",")"],["÷","/"],
+        ["sin","sin("],["cos","cos("],["tan","tan("],["√","sqrt("],["×","*"],
+        ["7","7"],["8","8"],["9","9"],["^","^"],["−","-"],
+        ["4","4"],["5","5"],["6","6"],["%","%"],["+","+"],
+        ["1","1"],["2","2"],["3","3"],["π","pi"],["=","equals"],
+        ["0","0"],[".","."],["e","e"],["ln","ln("],["log","log("]
+    ];
+    return "<div class='calculator-app'>" +
+        "<div class='calculator-heading'><div><h2>🧮 Taschenrechner</h2><p>Grundrechenarten und wissenschaftliche Funktionen</p></div><span class='calculator-mode'>WISSENSCHAFTLICH</span></div>" +
+        "<div class='calculator-display'><input id='calculatorInput' type='text' inputmode='decimal' autocomplete='off' placeholder='Ausdruck eingeben' aria-label='Rechenausdruck' onkeydown='calculatorKeydown(event)'><div id='calculatorResult' aria-live='polite'>Bereit</div></div>" +
+        "<div class='calculator-keys'>" + keys.map(([label,value]) => "<button type='button' class='" + (value === "equals" ? "calculator-equals" : ["clear","back"].includes(value) ? "calculator-special" : "") + "' onclick=\"calculatorPress('" + value + "')\">" + label + "</button>").join("") + "</div>" +
+        "<p class='monitor-note'>Trigonometrische Funktionen verwenden Grad. Unterstützt: sin, cos, tan, √, ln, log, π, e, Klammern und Potenzen.</p></div>";
+}
+
+function calculateExpression(source) {
+    const compact = String(source).replace(/\s+/g, "");
+    if (!compact) throw new Error("Bitte gib eine Rechnung ein.");
+    const tokens = compact.match(/(?:\d+(?:\.\d*)?|\.\d+)|[a-zA-Z]+|[+\-*/^()%]/g) || [];
+    if (tokens.join("") !== compact) throw new Error("Ungültiges Zeichen im Ausdruck.");
+    let position = 0;
+    const peek = () => tokens[position];
+    const take = () => tokens[position++];
+
+    function primary() {
+        const token = take();
+        if (token === undefined) throw new Error("Unvollständiger Ausdruck.");
+        let value;
+        if (token === "(") {
+            value = expression();
+            if (take() !== ")") throw new Error("Schließende Klammer fehlt.");
+        } else if (/^(?:\d+(?:\.\d*)?|\.\d+)$/.test(token)) {
+            value = Number(token);
+        } else if (/^[a-zA-Z]+$/.test(token)) {
+            const name = token.toLowerCase();
+            if (name === "pi") return Math.PI;
+            if (name === "e") return Math.E;
+            if (name === "ans") return lastCalculatorAnswer;
+            if (take() !== "(") throw new Error("Nach " + name + " wird eine Klammer erwartet.");
+            const argument = expression();
+            if (take() !== ")") throw new Error("Schließende Funktionsklammer fehlt.");
+            const functions = {
+                sin: n => Math.sin(n * Math.PI / 180),
+                cos: n => Math.cos(n * Math.PI / 180),
+                tan: n => Math.tan(n * Math.PI / 180),
+                sqrt: n => Math.sqrt(n),
+                abs: n => Math.abs(n),
+                ln: n => Math.log(n),
+                log: n => Math.log10(n),
+                round: n => Math.round(n),
+                floor: n => Math.floor(n),
+                ceil: n => Math.ceil(n)
+            };
+            if (!functions[name]) throw new Error("Unbekannte Funktion: " + name);
+            value = functions[name](argument);
+        } else {
+            throw new Error("Unerwartetes Zeichen: " + token);
+        }
+        while (peek() === "%") { take(); value /= 100; }
+        return value;
+    }
+
+    function power() {
+        const left = primary();
+        if (peek() === "^") { take(); return Math.pow(left, unary()); }
+        return left;
+    }
+    function unary() {
+        if (peek() === "+") { take(); return unary(); }
+        if (peek() === "-") { take(); return -unary(); }
+        return power();
+    }
+    function term() {
+        let value = unary();
+        while (peek() === "*" || peek() === "/") {
+            const operator = take();
+            const right = unary();
+            value = operator === "*" ? value * right : value / right;
+        }
+        return value;
+    }
+    function expression() {
+        let value = term();
+        while (peek() === "+" || peek() === "-") {
+            const operator = take();
+            const right = term();
+            value = operator === "+" ? value + right : value - right;
+        }
+        return value;
+    }
+
+    const result = expression();
+    if (position !== tokens.length) throw new Error("Der Ausdruck konnte nicht vollständig gelesen werden.");
+    if (!Number.isFinite(result)) throw new Error("Das Ergebnis ist nicht definiert.");
+    return result;
+}
+
+function calculatorPress(value) {
+    const input = document.getElementById("calculatorInput");
+    const output = document.getElementById("calculatorResult");
+    if (!input || !output) return;
+    if (value === "clear") { input.value = ""; output.textContent = "Bereit"; return; }
+    if (value === "back") { input.value = input.value.slice(0, -1); input.focus(); return; }
+    if (value === "equals") {
+        try {
+            const result = calculateExpression(input.value);
+            lastCalculatorAnswer = result;
+            output.textContent = Number(result.toPrecision(12)).toLocaleString("de-DE", {maximumFractionDigits:10});
+        } catch (error) { output.textContent = error.message; }
+        return;
+    }
+    if (output.textContent !== "Bereit" && !Number.isFinite(Number(output.textContent.replace(",", ".")))) output.textContent = "Bereit";
+    input.value += value;
+    input.focus();
+}
+function calculatorKeydown(event) {
+    if (event.key === "Enter" || event.key === "=") { event.preventDefault(); calculatorPress("equals"); }
+    else if (event.key === "Escape") { event.preventDefault(); calculatorPress("clear"); }
+}
+
+
+/* =====================================
+   SYSTEMSTEUERUNG
+===================================== */
+
+function systemControlContent() {
+    const accents = [
+        ["#1685df","Blau"],["#8b5cf6","Violett"],["#10b981","Grün"],
+        ["#f59e0b","Orange"],["#ef4444","Rot"],["#ec4899","Pink"],["#06b6d4","Türkis"]
+    ];
+    return "<div class='system-control-app'>" +
+        "<div class='system-control-heading'><h2>🛠️ Systemsteuerung</h2><p>Die wichtigsten Einstellungen von THYQORA OS an einem Ort.</p></div>" +
+        "<section class='control-section'><h3>🎨 Akzentfarbe</h3><div class='control-accent-list'>" +
+        accents.map(([color,name]) => "<button type='button' class='control-accent " + (settings.accent.toLowerCase() === color ? "selected" : "") + "' style='--choice:" + color + "' title='" + name + "' aria-label='" + name + "' onclick=\"setAccent('" + color + "')\"></button>").join("") +
+        "</div></section>" +
+        "<section class='control-section'><h3>🖼️ Desktop-Hintergrund</h3><div class='control-wallpaper-list'>" +
+        Object.entries(wallpapers).map(([number,background]) => "<button type='button' class='control-wallpaper " + (Number(settings.background) === Number(number) ? "selected" : "") + "' style='background:" + background + "' aria-label='Hintergrund " + number + "' title='Hintergrund " + number + "' onclick='setBackground(" + number + ")'></button>").join("") +
+        "</div></section>" +
+        "<section class='control-section'><h3>🔊 THYQORA-Lautstärke</h3><div class='control-volume-row'><input class='system-control-volume' type='range' min='0' max='100' value='" + settings.volume + "' oninput='setVolume(this.value)' aria-label='THYQORA-Lautstärke'><strong class='system-control-volume-value'>" + settings.volume + "%</strong></div><p class='monitor-note'>Dieser Regler speichert die Lautstärke-Einstellung in THYQORA OS. Er verändert nicht die Windows-Lautstärke.</p></section>" +
+        "<section class='control-section control-account'><h3>👤 Konto und System</h3><div><span>Angemeldet als</span><strong>" + escapeHTML(currentUsername || "Unbekannt") + "</strong></div><div><span>Version</span><strong>THYQORA OS 0.7</strong></div><div><span>Cloud-Speicher</span><strong>" + (cloudReady ? "Verbunden" : "Nicht verbunden") + "</strong></div><button type='button' onclick='logout()'>Abmelden</button></section></div>";
+}
+
+
+/* =====================================
+   WETTER-APP
+===================================== */
+
+let weatherCity = "";
+let weatherRequestNumber = 0;
+
+function weatherContent() {
+    return "<div class='weather-app'>" +
+        "<div class='weather-header'><div><h2>🌦️ Wetter</h2><p>Wettervorhersage für deinen Ort</p></div><button type='button' onclick='loadWeatherForecast()'>⟳ Aktualisieren</button></div>" +
+        "<form class='weather-search' onsubmit='event.preventDefault(); loadWeatherForecast(true)'><input id='weatherCityInput' type='text' maxlength='80' placeholder='Stadt eingeben, z. B. Saarbrücken' value='" + escapeHTML(weatherCity) + "' autocomplete='off'><button type='submit'>Suchen</button></form>" +
+        "<div id='weatherStatus' class='weather-status' aria-live='polite'>Gib einen Ort ein, um das Wetter abzurufen.</div><div id='weatherResult'></div>" +
+        "<p class='monitor-note weather-credit'>Wetterdaten: Open-Meteo · Für die Vorhersage wird eine Internetverbindung benötigt.</p></div>";
+}
+
+function weatherDescription(code) {
+    const descriptions = {
+        0:["Sonnig","☀️"],1:["Überwiegend sonnig","🌤️"],2:["Teilweise bewölkt","⛅"],3:["Bewölkt","☁️"],
+        45:["Neblig","🌫️"],48:["Nebel mit Reif","🌫️"],51:["Leichter Nieselregen","🌦️"],53:["Nieselregen","🌦️"],55:["Starker Nieselregen","🌧️"],
+        56:["Gefrierender Nieselregen","🌧️"],57:["Starker gefrierender Nieselregen","🌧️"],61:["Leichter Regen","🌧️"],63:["Regen","🌧️"],65:["Starker Regen","🌧️"],
+        66:["Gefrierender Regen","🌧️"],67:["Starker gefrierender Regen","🌧️"],71:["Leichter Schneefall","🌨️"],73:["Schneefall","🌨️"],75:["Starker Schneefall","❄️"],
+        77:["Schneegriesel","🌨️"],80:["Regenschauer","🌦️"],81:["Regenschauer","🌧️"],82:["Starke Regenschauer","⛈️"],85:["Schneeschauer","🌨️"],86:["Starke Schneeschauer","❄️"],
+        95:["Gewitter","⛈️"],96:["Gewitter mit Hagel","⛈️"],99:["Starkes Gewitter mit Hagel","⛈️"]
+    };
+    return descriptions[code] || ["Unbekannt","🌡️"];
+}
+
+async function loadWeatherForecast(saveCity = false) {
+    const input = document.getElementById("weatherCityInput");
+    const status = document.getElementById("weatherStatus");
+    const result = document.getElementById("weatherResult");
+    if (!status || !result) return;
+    const city = (input?.value || weatherCity).trim();
+    if (!city) { status.textContent = "Bitte gib zuerst eine Stadt ein."; result.innerHTML = ""; return; }
+
+    const requestNumber = ++weatherRequestNumber;
+    status.textContent = "Wetterdaten für " + city + " werden geladen …";
+    result.innerHTML = "";
+
+    try {
+        const geoResponse = await fetch("https://geocoding-api.open-meteo.com/v1/search?name=" + encodeURIComponent(city) + "&count=1&language=de&format=json");
+        if (!geoResponse.ok) throw new Error("Der Ortsdienst ist gerade nicht erreichbar.");
+        const geoData = await geoResponse.json();
+        const place = geoData.results && geoData.results[0];
+        if (!place) throw new Error("Der Ort wurde nicht gefunden. Prüfe die Schreibweise.");
+
+        const params = new URLSearchParams({
+            latitude: place.latitude,
+            longitude: place.longitude,
+            current: "temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,wind_speed_10m",
+            daily: "weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max",
+            timezone: "auto",
+            forecast_days: "7"
+        });
+        const forecastResponse = await fetch("https://api.open-meteo.com/v1/forecast?" + params.toString());
+        if (!forecastResponse.ok) throw new Error("Die Wettervorhersage konnte nicht geladen werden.");
+        const data = await forecastResponse.json();
+        if (requestNumber !== weatherRequestNumber) return;
+
+        weatherCity = place.name + (place.admin1 ? ", " + place.admin1 : "");
+        if (saveCity) queueSave("thyqoraWeatherCity", weatherCity);
+
+        const current = data.current;
+        const description = weatherDescription(current.weather_code);
+        const unit = data.current_units?.temperature_2m || "°C";
+        const windUnit = data.current_units?.wind_speed_10m || "km/h";
+        const days = data.daily.time.map((date,index) => {
+            const dayWeather = weatherDescription(data.daily.weather_code[index]);
+            const dayName = new Date(date + "T12:00:00").toLocaleDateString("de-DE",{weekday:"short",day:"2-digit",month:"2-digit"});
+            return "<div class='weather-day'><span class='weather-day-name'>" + dayName + "</span><span class='weather-day-icon'>" + dayWeather[1] + "</span><span>" + Math.round(data.daily.temperature_2m_max[index]) + "° / " + Math.round(data.daily.temperature_2m_min[index]) + "°</span><small>" + (data.daily.precipitation_probability_max?.[index] ?? 0) + "% Regen</small></div>";
+        }).join("");
+
+        result.innerHTML = "<div class='weather-current'><div class='weather-place'>" + escapeHTML(weatherCity) + "</div><div class='weather-main'><span class='weather-icon'>" + description[1] + "</span><strong>" + Math.round(current.temperature_2m) + unit + "</strong></div><div class='weather-description'>" + description[0] + "</div><div class='weather-details'>" +
+            "<div><small>Gefühlt</small><strong>" + Math.round(current.apparent_temperature) + unit + "</strong></div>" +
+            "<div><small>Luftfeuchtigkeit</small><strong>" + current.relative_humidity_2m + "%</strong></div>" +
+            "<div><small>Wind</small><strong>" + Math.round(current.wind_speed_10m) + " " + windUnit + "</strong></div>" +
+            "<div><small>Niederschlag</small><strong>" + current.precipitation + " mm</strong></div></div></div>" +
+            "<h3 class='weather-forecast-title'>7-Tage-Vorhersage</h3><div class='weather-days'>" + days + "</div>";
+
+        status.textContent = "Zuletzt aktualisiert: " + new Date().toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"});
+        if (input) input.value = weatherCity;
+    } catch (error) {
+        if (requestNumber !== weatherRequestNumber) return;
+        status.textContent = error.message || "Wetterdaten konnten nicht geladen werden.";
+        result.innerHTML = "";
+    }
+}
+
+
 function getAppContent(app) {
 
     if (app === "monitor") {
@@ -2513,6 +2838,15 @@ function getAppContent(app) {
     if (app === "settings") return settingsContent();
 
     if (app === "designcenter") return designCenterContent();
+
+    if (app === "calculator") return calculatorContent();
+
+    if (app === "systemcontrol") return systemControlContent();
+
+    if (app === "weather") {
+        setTimeout(() => loadWeatherForecast(), 0);
+        return weatherContent();
+    }
 
     if (app === "browser") {
         return `
@@ -2540,7 +2874,7 @@ function getAppContent(app) {
         return `
             <div class="terminal">
                 <div id="terminalOutput">
-                    THYQORA TERMINAL [Version 0.6]<br>
+                    THYQORA TERMINAL [Version 0.7]<br>
                     Schreibe help für alle Befehle.<br><br>
                 </div>
 
@@ -2556,7 +2890,7 @@ function getAppContent(app) {
     if (app === "about") {
         return `
             <h2>💻 THYQORA OS</h2>
-            <p>Version 0.6</p>
+            <p>Version 0.7</p>
             <p>Ein eigenes browserbasiertes Betriebssystem.</p>
 
             <h3>Systeminformationen</h3>
@@ -3296,7 +3630,7 @@ function appCenterContent() {
         <div class="system-monitor">
             <div>
                 <h2 style="margin:0">🛍️ App-Center</h2>
-                <p class="monitor-note">Installiere und verwalte deine THYQORA-Apps.</p>
+                <p class="monitor-note">Installiere und verwalte deine THYQORA-Apps. Neu in Version 0.7: Taschenrechner, Systemsteuerung und Wetter.</p>
             </div>
             <h3 class="store-section-title">Installierte Apps</h3>
             <div id="appCenterInstalled" class="store-list"></div>
@@ -3492,7 +3826,7 @@ function runCommand() {
     } else if (command === "about") {
         result = "THYQORA OS – ein browserbasiertes Betriebssystem.";
     } else if (command === "version") {
-        result = "THYQORA OS Version 0.6";
+        result = "THYQORA OS Version 0.7";
     } else if (command === "date") {
         result = new Date().toLocaleDateString("de-DE");
     } else if (command === "time") {
@@ -3502,7 +3836,7 @@ function runCommand() {
     } else if (command === "uptime") {
         result = "Diese Sitzung läuft seit " + formatSessionUptime() + ".";
     } else if (command === "sysinfo" || command === "system") {
-        result = "THYQORA OS 0.6 | Browser: " + navigator.userAgent +
+        result = "THYQORA OS 0.7 | Browser: " + navigator.userAgent +
             " | " + navigator.hardwareConcurrency + " logische CPU-Kerne" +
             " | Bildschirm: " + screen.width + "x" + screen.height;
     } else if (command === "memory" || command === "ram") {
