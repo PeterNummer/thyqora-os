@@ -509,6 +509,22 @@ body.authenticated #authScreen {
 .browser-view iframe { width:100%; height:100%; min-height:100%; display:block; border:0; background:white; }
 .browser-status { flex:0 0 auto; margin:0; min-height:18px; color:#a9bfd8; font-size:12px; }
 .game-center { display:flex; flex-direction:column; gap:10px; height:100%; min-height:0; }
+.game-presets { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:9px; }
+.game-tile { display:flex; flex-direction:column; align-items:flex-start; gap:5px; min-height:112px; padding:12px !important; margin:0 !important; text-align:left; background:#ffffff10 !important; }
+.game-tile span { font-size:25px; }
+.game-tile strong { font-size:14px; }
+.game-tile small { color:#b9c8dd; font-size:11px; }
+.game-stage { flex:1; min-height:180px; overflow:auto; padding:10px; background:#07111f80; border:1px solid #ffffff20; border-radius:9px; }
+.builtin-game { display:flex; flex-direction:column; align-items:center; gap:8px; text-align:center; }
+.builtin-game h3 { margin:2px 0; }
+#snakeCanvas { width:min(360px,100%); height:auto; aspect-ratio:1; border:1px solid #ffffff40; border-radius:6px; image-rendering:pixelated; }
+.snake-info { font-size:13px; }
+.memory-grid { display:grid; grid-template-columns:repeat(4,minmax(48px,64px)); gap:7px; justify-content:center; }
+.memory-card { width:100%; aspect-ratio:1; margin:0 !important; font-size:23px; font-weight:700; }
+.memory-card.revealed { background:#1676c5 !important; }
+.memory-card.matched { background:#237b52 !important; opacity:.8; }
+.ttt-grid { display:grid; grid-template-columns:repeat(3,75px); gap:7px; }
+.ttt-cell { width:75px; height:75px; margin:0 !important; font-size:30px; font-weight:700; }
 .game-add-row { display:flex; gap:7px; flex-wrap:wrap; }
 .game-add-row input { flex:1 1 180px; min-width:120px; margin:0; max-width:none; }
 .game-list { display:flex; flex-wrap:wrap; gap:7px; max-height:100px; overflow:auto; }
@@ -2147,113 +2163,219 @@ function gameCenterContent() {
         <div class="game-center">
             <div>
                 <h2 style="margin:0">🎮 Game-Center</h2>
-                <p class="game-help">Füge ein Webspiel per HTTPS-Adresse hinzu. Es wird direkt hier im Fenster geöffnet.</p>
+                <p class="game-help">Wähle eines der vorinstallierten Spiele aus. Alle Spiele laufen direkt in THYQORA OS – ohne externe Webseiten oder Adressen.</p>
             </div>
-            <div class="game-add-row">
-                <input id="gameNameInput" type="text" maxlength="40" placeholder="Spielname">
-                <input id="gameUrlInput" type="url" placeholder="https://spielseite.example">
-                <button type="button" onclick="addGame()">Hinzufügen</button>
+            <div class="game-presets">
+                <button type="button" class="game-tile" onclick="launchBuiltinGame('snake')">
+                    <span>🐍</span><strong>Snake</strong><small>Iss Äpfel und werde länger.</small>
+                </button>
+                <button type="button" class="game-tile" onclick="launchBuiltinGame('memory')">
+                    <span>🧠</span><strong>Memory</strong><small>Finde alle Kartenpaare.</small>
+                </button>
+                <button type="button" class="game-tile" onclick="launchBuiltinGame('tictactoe')">
+                    <span>⭕</span><strong>Tic-Tac-Toe</strong><small>Spiele zu zweit auf einem Feld.</small>
+                </button>
             </div>
-            <div id="gameList" class="game-list"></div>
-            <div class="game-frame-wrap">
-                <iframe id="gameFrame" title="Spiel in THYQORA OS" src="about:blank"
-                        allow="fullscreen; gamepad" allowfullscreen
-                        referrerpolicy="strict-origin-when-cross-origin"></iframe>
+            <div class="game-stage" id="gameStage">
+                <div class="empty-state">Wähle oben ein Spiel aus, um loszulegen.</div>
             </div>
-            <p class="game-help" id="gameStatus">Wähle ein Spiel aus. Manche Websites blockieren die Einbettung; solche Spiele können hier leider nicht gestartet werden.</p>
         </div>
     `;
 }
 
-function saveGames() {
-    return queueSave("thyqoraGames", savedGames);
-}
+let snakeTimer = null;
+let snakeState = null;
 
-function renderGameCenter() {
-    const list = document.getElementById("gameList");
-    if (!list) return;
-    list.innerHTML = "";
+function launchBuiltinGame(name) {
+    if (snakeTimer) {
+        clearInterval(snakeTimer);
+        snakeTimer = null;
+    }
 
-    if (!savedGames.length) {
-        list.innerHTML = '<span class="game-help">Noch keine Spiele hinzugefügt.</span>';
+    const stage = document.getElementById("gameStage");
+    if (!stage) return;
+
+    if (name === "snake") {
+        stage.innerHTML = `
+            <div class="builtin-game">
+                <h3>🐍 Snake</h3>
+                <p class="game-help">Steuere die Schlange mit den Pfeiltasten. Sammle Äpfel und stoße nicht gegen dich selbst oder die Wand.</p>
+                <div class="snake-info">Punkte: <strong id="snakeScore">0</strong></div>
+                <canvas id="snakeCanvas" width="360" height="360"></canvas>
+                <button type="button" onclick="startSnake()">▶ Start / Neu starten</button>
+                <p class="game-help" id="snakeStatus">Bereit? Drücke auf Start.</p>
+            </div>`;
+        drawSnake();
         return;
     }
 
-    savedGames.forEach((game, index) => {
-        const chip = document.createElement("div");
-        chip.className = "game-chip";
-        const play = document.createElement("button");
-        play.type = "button";
-        play.textContent = "▶ " + game.name;
-        play.title = "Im Game-Center starten";
-        play.onclick = () => launchGame(index);
-        const remove = document.createElement("button");
-        remove.type = "button";
-        remove.textContent = "×";
-        remove.title = "Spiel entfernen";
-        remove.onclick = () => removeGame(index);
-        chip.append(play, remove);
-        list.appendChild(chip);
+    if (name === "memory") {
+        const symbols = ["🚀","🌟","🐱","🍀","⚽","🎮","🍉","🦊"];
+        const cards = [...symbols, ...symbols].sort(() => Math.random() - 0.5);
+        stage.innerHTML = `
+            <div class="builtin-game">
+                <h3>🧠 Memory</h3>
+                <p class="game-help">Finde alle acht Paare.</p>
+                <p class="game-help" id="memoryStatus">Gefundene Paare: 0 / 8</p>
+                <div class="memory-grid" id="memoryGrid"></div>
+                <button type="button" onclick="launchBuiltinGame('memory')">Neu mischen</button>
+            </div>`;
+        let first = null, locked = false, pairs = 0;
+        const grid = document.getElementById("memoryGrid");
+        cards.forEach((symbol, index) => {
+            const card = document.createElement("button");
+            card.type = "button";
+            card.className = "memory-card";
+            card.textContent = "?";
+            card.setAttribute("aria-label", "Verdeckte Karte");
+            card.onclick = () => {
+                if (locked || card.classList.contains("matched") || card === first) return;
+                card.textContent = symbol;
+                card.classList.add("revealed");
+                if (!first) { first = card; return; }
+                if (first.textContent === symbol) {
+                    first.classList.add("matched");
+                    card.classList.add("matched");
+                    first = null;
+                    pairs++;
+                    document.getElementById("memoryStatus").textContent = "Gefundene Paare: " + pairs + " / 8";
+                    if (pairs === 8) document.getElementById("memoryStatus").textContent = "Geschafft! Du hast alle Paare gefunden. 🎉";
+                } else {
+                    locked = true;
+                    const previous = first;
+                    first = null;
+                    setTimeout(() => {
+                        previous.textContent = "?";
+                        card.textContent = "?";
+                        previous.classList.remove("revealed");
+                        card.classList.remove("revealed");
+                        locked = false;
+                    }, 750);
+                }
+            };
+            grid.appendChild(card);
+        });
+        return;
+    }
+
+    if (name === "tictactoe") {
+        stage.innerHTML = `
+            <div class="builtin-game">
+                <h3>⭕ Tic-Tac-Toe</h3>
+                <p class="game-help" id="tttStatus">Spieler X ist dran.</p>
+                <div class="ttt-grid" id="tttGrid"></div>
+                <button type="button" onclick="launchBuiltinGame('tictactoe')">Neues Spiel</button>
+            </div>`;
+        let board = Array(9).fill("");
+        let player = "X";
+        let finished = false;
+        const wins = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+        const grid = document.getElementById("tttGrid");
+        board.forEach((_, index) => {
+            const cell = document.createElement("button");
+            cell.type = "button";
+            cell.className = "ttt-cell";
+            cell.onclick = () => {
+                if (finished || board[index]) return;
+                board[index] = player;
+                cell.textContent = player;
+                const won = wins.some(line => line.every(i => board[i] === player));
+                if (won) {
+                    finished = true;
+                    document.getElementById("tttStatus").textContent = "Spieler " + player + " hat gewonnen! 🎉";
+                } else if (board.every(Boolean)) {
+                    finished = true;
+                    document.getElementById("tttStatus").textContent = "Unentschieden!";
+                } else {
+                    player = player === "X" ? "O" : "X";
+                    document.getElementById("tttStatus").textContent = "Spieler " + player + " ist dran.";
+                }
+            };
+            grid.appendChild(cell);
+        });
+    }
+}
+
+function startSnake() {
+    if (snakeTimer) clearInterval(snakeTimer);
+    snakeState = {
+        body: [{x:10,y:10},{x:9,y:10},{x:8,y:10}],
+        direction: {x:1,y:0},
+        next: {x:1,y:0},
+        food: {x:15,y:10},
+        score: 0,
+        over: false
+    };
+    const status = document.getElementById("snakeStatus");
+    if (status) status.textContent = "Läuft! Nutze die Pfeiltasten.";
+    document.onkeydown = event => {
+        if (!snakeState || snakeState.over) return;
+        const dirs = {
+            ArrowUp:{x:0,y:-1}, ArrowDown:{x:0,y:1},
+            ArrowLeft:{x:-1,y:0}, ArrowRight:{x:1,y:0}
+        };
+        const next = dirs[event.key];
+        if (!next) return;
+        event.preventDefault();
+        if (next.x !== -snakeState.direction.x || next.y !== -snakeState.direction.y) {
+            snakeState.next = next;
+        }
+    };
+    drawSnake();
+    snakeTimer = setInterval(stepSnake, 125);
+}
+
+function stepSnake() {
+    if (!snakeState || snakeState.over) return;
+    const game = snakeState;
+    game.direction = game.next;
+    const head = {x:game.body[0].x + game.direction.x, y:game.body[0].y + game.direction.y};
+    const ate = head.x === game.food.x && head.y === game.food.y;
+    const collisionBody = ate ? game.body : game.body.slice(0, -1);
+    if (head.x < 0 || head.x >= 20 || head.y < 0 || head.y >= 20 ||
+        collisionBody.some(part => part.x === head.x && part.y === head.y)) {
+        game.over = true;
+        clearInterval(snakeTimer);
+        snakeTimer = null;
+        const status = document.getElementById("snakeStatus");
+        if (status) status.textContent = "Spiel vorbei! Punkte: " + game.score + ". Drücke Neu starten.";
+        return;
+    }
+    game.body.unshift(head);
+    if (ate) {
+        game.score++;
+        do {
+            game.food = {x:Math.floor(Math.random()*20),y:Math.floor(Math.random()*20)};
+        } while (game.body.some(part => part.x === game.food.x && part.y === game.food.y));
+        const score = document.getElementById("snakeScore");
+        if (score) score.textContent = game.score;
+    } else {
+        game.body.pop();
+    }
+    drawSnake();
+}
+
+function drawSnake() {
+    const canvas = document.getElementById("snakeCanvas");
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    ctx.fillStyle = "#07111f";
+    ctx.fillRect(0,0,360,360);
+    if (!snakeState) return;
+    ctx.fillStyle = "#ef5555";
+    ctx.fillRect(snakeState.food.x*18+2,snakeState.food.y*18+2,14,14);
+    snakeState.body.forEach((part,index) => {
+        ctx.fillStyle = index === 0 ? "#8be36b" : "#39a852";
+        ctx.fillRect(part.x*18+1,part.y*18+1,16,16);
     });
 }
 
-async function addGame() {
-    const nameInput = document.getElementById("gameNameInput");
-    const urlInput = document.getElementById("gameUrlInput");
-    if (!nameInput || !urlInput) return;
-
-    const name = nameInput.value.trim();
-    let url;
-    try {
-        url = new URL(urlInput.value.trim());
-    } catch {
-        notify("Ungültige Adresse", "Bitte gib eine vollständige HTTPS-Adresse ein.");
-        return;
+document.addEventListener("keydown", event => {
+    if (["ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].includes(event.key) &&
+        document.getElementById("snakeCanvas")) {
+        event.preventDefault();
     }
-
-    if (url.protocol !== "https:") {
-        notify("Nur HTTPS erlaubt", "Spiele müssen über eine sichere HTTPS-Adresse eingebunden werden.");
-        return;
-    }
-    if (!name) {
-        notify("Spielname fehlt", "Bitte gib dem Spiel einen Namen.");
-        return;
-    }
-    if (savedGames.some(game => game.url === url.href)) {
-        notify("Spiel bereits vorhanden", "Diese Adresse ist schon im Game-Center gespeichert.");
-        return;
-    }
-
-    savedGames.push({ id: createId(), name, url: url.href });
-    await saveGames();
-    nameInput.value = "";
-    urlInput.value = "";
-    renderGameCenter();
-    launchGame(savedGames.length - 1);
-    notify("Spiel hinzugefügt", name + " wurde im Game-Center gespeichert.");
-}
-
-function launchGame(index) {
-    const game = savedGames[index];
-    const frame = document.getElementById("gameFrame");
-    const status = document.getElementById("gameStatus");
-    if (!game || !frame) return;
-    frame.src = game.url;
-    if (status) status.textContent = game.name + " wird im THYQORA-Fenster geladen. Falls die Seite leer bleibt, verbietet sie möglicherweise die Einbettung.";
-}
-
-async function removeGame(index) {
-    const game = savedGames[index];
-    if (!game) return;
-    savedGames.splice(index, 1);
-    const frame = document.getElementById("gameFrame");
-    const status = document.getElementById("gameStatus");
-    if (frame) frame.src = "about:blank";
-    if (status) status.textContent = "Wähle ein Spiel aus.";
-    await saveGames();
-    renderGameCenter();
-    notify("Spiel entfernt", game.name + " wurde aus dem Game-Center entfernt.");
-}
+});
 
 function getAppContent(app) {
 
@@ -2307,7 +2429,7 @@ function getAppContent(app) {
         return `
             <div class="terminal">
                 <div id="terminalOutput">
-                    THYQORA TERMINAL [Version 0.4]<br>
+                    THYQORA TERMINAL [Version 0.5]<br>
                     Schreibe help für alle Befehle.<br><br>
                 </div>
 
@@ -2323,7 +2445,7 @@ function getAppContent(app) {
     if (app === "about") {
         return `
             <h2>💻 THYQORA OS</h2>
-            <p>Version 0.3</p>
+            <p>Version 0.5</p>
             <p>Ein eigenes browserbasiertes Betriebssystem.</p>
 
             <h3>Systeminformationen</h3>
@@ -3259,7 +3381,7 @@ function runCommand() {
     } else if (command === "about") {
         result = "THYQORA OS – ein browserbasiertes Betriebssystem.";
     } else if (command === "version") {
-        result = "THYQORA OS Version 0.4";
+        result = "THYQORA OS Version 0.5";
     } else if (command === "date") {
         result = new Date().toLocaleDateString("de-DE");
     } else if (command === "time") {
@@ -3269,7 +3391,7 @@ function runCommand() {
     } else if (command === "uptime") {
         result = "Diese Sitzung läuft seit " + formatSessionUptime() + ".";
     } else if (command === "sysinfo" || command === "system") {
-        result = "THYQORA OS 0.4 | Browser: " + navigator.userAgent +
+        result = "THYQORA OS 0.5 | Browser: " + navigator.userAgent +
             " | " + navigator.hardwareConcurrency + " logische CPU-Kerne" +
             " | Bildschirm: " + screen.width + "x" + screen.height;
     } else if (command === "memory" || command === "ram") {
