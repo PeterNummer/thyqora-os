@@ -281,7 +281,7 @@ body.authenticated #authScreen {
     align-items: center;
     justify-content: center;
     gap: 7px;
-    border-top: 1px solid #ffffff20;
+    border-top: 3px solid var(--accent);
     z-index: 10000;
 }
 
@@ -307,7 +307,7 @@ body.authenticated #authScreen {
 
 .task-button:hover,
 .task-button.active {
-    background: #ffffff25;
+    background: color-mix(in srgb, var(--accent) 35%, transparent);
 }
 
 .task-button.active::after {
@@ -431,6 +431,7 @@ body.authenticated #authScreen {
 /* FENSTER */
 
 .window {
+    border-color: color-mix(in srgb, var(--accent) 65%, #ffffff35);
     position: absolute;
     top: 90px;
     left: 50%;
@@ -457,7 +458,7 @@ body.authenticated #authScreen {
 .titlebar {
     height: 42px;
     min-height: 42px;
-    background: #253653;
+    background: color-mix(in srgb, var(--accent) 38%, #17243b);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -538,7 +539,7 @@ body.authenticated #authScreen {
 }
 
 .window-content button:hover {
-    background: #38567c;
+    background: var(--accent);
     border-color: var(--accent);
 }
 
@@ -1532,11 +1533,16 @@ function applySettings() {
 
 function setAccent(color) {
     const allowed = ["#1685df", "#8b5cf6", "#10b981", "#f59e0b", "#ef4444", "#ec4899", "#06b6d4"];
+    color = String(color || "").toLowerCase();
     if (!allowed.includes(color)) return;
     settings.accent = color;
+    document.documentElement.style.setProperty("--accent", color);
     applySettings();
+    document.querySelectorAll(".accent-choice").forEach(button => {
+        button.classList.toggle("selected", button.dataset.accent.toLowerCase() === color);
+    });
     saveSettings();
-    notify("Akzentfarbe geändert", "Deine Design-Einstellungen wurden gespeichert.");
+    notify("Akzentfarbe geändert", "Die neue Akzentfarbe ist jetzt aktiv.");
 }
 
 function designCenterContent() {
@@ -2241,10 +2247,6 @@ function openApp(app) {
         maximized: false,
         previous: null
     };
-
-    win.querySelectorAll(".accent-choice").forEach(button => {
-        button.addEventListener("click", () => setAccent(button.dataset.accent));
-    });
 
     win.querySelector('[data-action="minimize"]').onclick =
         () => minimizeWindow(app);
@@ -3255,6 +3257,16 @@ function updateClock() {
         now.toLocaleDateString("de-DE");
 }
 
+
+/* Akzentfarben per Event-Delegation behandeln, damit sie auch nach
+   erneutem Rendern eines Fensters zuverlässig reagieren. */
+document.addEventListener("click", event => {
+    const accentButton = event.target.closest(".accent-choice");
+    if (accentButton) {
+        event.preventDefault();
+        setAccent(accentButton.dataset.accent);
+    }
+});
 
 /* =====================================
    SYSTEMSTART
