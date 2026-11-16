@@ -665,7 +665,7 @@ body.authenticated #authScreen {
 .game-help { margin:0; color:#a9bfd8; font-size:12px; line-height:1.45; }
 
 
-/* NEUE APPS 0.11 */
+/* NEUE APPS 0.12 */
 .calculator-app,.system-control-app,.weather-app { display:flex; flex-direction:column; gap:13px; max-width:100%; }
 .calculator-heading,.weather-header { display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; }
 .calculator-heading h2,.weather-header h2,.system-control-heading h2 { margin:0 0 4px; }
@@ -3155,7 +3155,7 @@ function systemControlContent() {
         Object.entries(wallpapers).map(([number,background]) => "<button type='button' class='control-wallpaper " + (Number(settings.background) === Number(number) ? "selected" : "") + "' data-wallpaper='" + number + "' style='background:" + background + "' aria-label='Hintergrund " + number + "' title='Hintergrund " + number + "' onclick='setBackground(" + number + ")'></button>").join("") +
         "</div></section>" +
         "<section class='control-section'><h3>🔊 THYQORA-Lautstärke</h3><div class='control-volume-row'><input class='system-control-volume' type='range' min='0' max='100' value='" + settings.volume + "' oninput='setVolume(this.value)' aria-label='THYQORA-Lautstärke'><strong class='system-control-volume-value'>" + settings.volume + "%</strong></div><p class='monitor-note'>Dieser Regler speichert die Lautstärke-Einstellung in THYQORA OS. Er verändert nicht die Windows-Lautstärke.</p></section>" +
-        "<section class='control-section control-account'><h3>👤 Konto und System</h3><div><span>Angemeldet als</span><strong>" + escapeHTML(currentUsername || "Unbekannt") + "</strong></div><div><span>Version</span><strong>THYQORA OS 0.11</strong></div><div><span>Cloud-Speicher</span><strong>" + (cloudReady ? "Verbunden" : "Nicht verbunden") + "</strong></div><button type='button' onclick='logout()'>Abmelden</button></section></div>";
+        "<section class='control-section control-account'><h3>👤 Konto und System</h3><div><span>Angemeldet als</span><strong>" + escapeHTML(currentUsername || "Unbekannt") + "</strong></div><div><span>Version</span><strong>THYQORA OS 0.12</strong></div><div><span>Cloud-Speicher</span><strong>" + (cloudReady ? "Verbunden" : "Nicht verbunden") + "</strong></div><button type='button' onclick='logout()'>Abmelden</button></section></div>";
 }
 
 
@@ -3305,7 +3305,7 @@ function getAppContent(app) {
         return `
             <div class="terminal">
                 <div id="terminalOutput">
-                    THYQORA TERMINAL [Version 0.11]<br>
+                    THYQORA TERMINAL [Version 0.12]<br>
                     Schreibe help für alle Befehle.<br><br>
                 </div>
 
@@ -3321,7 +3321,7 @@ function getAppContent(app) {
     if (app === "about") {
         return `
             <h2>💻 THYQORA OS</h2>
-            <p>Version 0.11</p>
+            <p>Version 0.12</p>
             <p>Ein eigenes browserbasiertes Betriebssystem.</p>
 
             <h3>Systeminformationen</h3>
@@ -4270,7 +4270,7 @@ function appCenterContent() {
         <div class="system-monitor">
             <div>
                 <h2 style="margin:0">🛍️ App-Center</h2>
-                <p class="monitor-note">Installiere und verwalte deine THYQORA-Apps. Neu in Version 0.11: Taschenrechner, Systemsteuerung und Wetter.</p>
+                <p class="monitor-note">Installiere und verwalte deine THYQORA-Apps. Neu in Version 0.12: Taschenrechner, Systemsteuerung und Wetter.</p>
             </div>
             <h3 class="store-section-title">Installierte Apps</h3>
             <div id="appCenterInstalled" class="store-list"></div>
@@ -4460,7 +4460,7 @@ function runCommand() {
     } else if (command === "about") {
         result = "THYQORA OS – ein browserbasiertes Betriebssystem.";
     } else if (command === "version") {
-        result = "THYQORA OS Version 0.11";
+        result = "THYQORA OS Version 0.12";
     } else if (command === "date") {
         result = new Date().toLocaleDateString("de-DE");
     } else if (command === "time") {
@@ -4470,7 +4470,7 @@ function runCommand() {
     } else if (command === "uptime") {
         result = "Diese Sitzung läuft seit " + formatSessionUptime() + ".";
     } else if (command === "sysinfo" || command === "system") {
-        result = "THYQORA OS 0.11 | Browser: " + navigator.userAgent +
+        result = "THYQORA OS 0.12 | Browser: " + navigator.userAgent +
             " | " + navigator.hardwareConcurrency + " logische CPU-Kerne" +
             " | Bildschirm: " + screen.width + "x" + screen.height;
     } else if (command === "memory" || command === "ram") {
