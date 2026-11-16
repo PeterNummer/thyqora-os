@@ -2397,7 +2397,12 @@ const externalGameCatalog = [
     {id:"lantern-lines",name:"Lantern Lines",icon:"🏮",description:"Verbinde passende Punkte ohne Kreuzungen.",url:"https://www.uploadarcade.com/embed/lantern-lines",page:"https://www.uploadarcade.com/games/lantern-lines"},
     {id:"cloud-courier",name:"Cloud Courier",icon:"☁️",description:"Halte einen kleinen Kurier in der Luft.",url:"https://www.uploadarcade.com/embed/cloud-courier",page:"https://www.uploadarcade.com/games/cloud-courier"},
     {id:"signal-garden",name:"Signal Garden",icon:"🌱",description:"Merke dir Muster und wiederhole sie.",url:"https://www.uploadarcade.com/embed/signal-garden",page:"https://www.uploadarcade.com/games/signal-garden"},
-    {id:"color-relay",name:"Color Relay",icon:"🎨",description:"Reagiere schnell und passe die Farben an.",url:"https://www.uploadarcade.com/embed/color-relay",page:"https://www.uploadarcade.com/games/color-relay"}
+    {id:"color-relay",name:"Color Relay",icon:"🎨",description:"Reagiere schnell und passe die Farben an.",url:"https://www.uploadarcade.com/embed/color-relay",page:"https://www.uploadarcade.com/games/color-relay",provider:"Upload Arcade"},
+    {id:"pocket-reactor",name:"Pocket Reactor",icon:"⚛️",description:"Löse ein kleines Energie- und Logikrätsel.",url:"https://www.uploadarcade.com/embed/pocket-reactor",page:"https://www.uploadarcade.com/games/pocket-reactor",provider:"Upload Arcade"},
+    {id:"hextris",name:"Hextris",icon:"⬡",description:"Ordne fallende Formen geschickt an.",url:"https://playbolt.app/play/hextris/",page:"https://playbolt.app/embed/",provider:"PlayBolt"},
+    {id:"astray",name:"Astray",icon:"🌀",description:"Finde den Weg durch ein Labyrinth.",url:"https://playbolt.app/play/astray/",page:"https://playbolt.app/embed/",provider:"PlayBolt"},
+    {id:"tetris",name:"Tetris",icon:"🧱",description:"Staple fallende Blöcke und bilde Reihen.",url:"https://playbolt.app/play/tetris/",page:"https://playbolt.app/embed/",provider:"PlayBolt"},
+    {id:"breakout",name:"Breakout",icon:"🟦",description:"Zerstöre alle Blöcke mit dem Ball.",url:"https://playbolt.app/play/breakout/",page:"https://playbolt.app/embed/",provider:"PlayBolt"}
 ];
 
 function gameCenterContent() {
@@ -2496,7 +2501,7 @@ function launchExternalGame(id) {
     frame.referrerPolicy = "strict-origin-when-cross-origin";
     const credit = document.createElement("p");
     credit.className = "game-help game-credit";
-    credit.append("Externes Spiel von Upload Arcade · ");
+    credit.append("Externes Spiel von " + (game.provider || "Upload Arcade") + " · ");
     const link = document.createElement("a");
     link.href = game.page;
     link.target = "_blank";
