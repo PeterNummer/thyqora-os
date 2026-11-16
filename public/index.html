@@ -2795,6 +2795,7 @@ function launchBuiltinGame(name) {
             };
             grid.appendChild(cell);
         });
+        addFullscreenExitButton(stage);
     }
     if (name === "connect4") {
         stage.innerHTML = `<div class="builtin-game"><h3>🔴 Vier gewinnt</h3><p class="game-help" id="connect4Status">Rot ist dran.</p><div class="connect4-grid" id="connect4Grid"></div><button type="button" onclick="launchBuiltinGame('connect4')">Neues Spiel</button></div>`;
@@ -2820,6 +2821,7 @@ function launchBuiltinGame(name) {
             };
             grid.appendChild(cell);
         }
+        addFullscreenExitButton(stage);
         return;
     }
 
@@ -2832,6 +2834,7 @@ function launchBuiltinGame(name) {
             else if(waiting){clearTimeout(timer);waiting=false;pad.className="reaction-pad";pad.textContent="Nochmal versuchen";status.textContent="Zu früh! Warte auf Grün.";}
             else if(ready){const elapsed=Math.round(performance.now()-startedAt);ready=false;pad.className="reaction-pad";pad.textContent="Nochmal";status.textContent="Deine Reaktionszeit: "+elapsed+" ms";best.textContent="Starte erneut für eine weitere Runde.";}
         };
+        addFullscreenExitButton(stage);
         return;
     }
 
@@ -2856,6 +2859,7 @@ function launchBuiltinGame(name) {
         window.thyqora2048Move=move;
         document.onkeydown=event=>{const keys={ArrowUp:"up",ArrowDown:"down",ArrowLeft:"left",ArrowRight:"right"};if(keys[event.key]){event.preventDefault();move(keys[event.key]);}};
         spawn();spawn();draw();
+        addFullscreenExitButton(stage);
     }
 
 }
