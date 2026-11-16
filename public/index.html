@@ -659,7 +659,7 @@ body.authenticated #authScreen {
 .game-help { margin:0; color:#a9bfd8; font-size:12px; line-height:1.45; }
 
 
-/* NEUE APPS 0.10 */
+/* NEUE APPS 0.11 */
 .calculator-app,.system-control-app,.weather-app { display:flex; flex-direction:column; gap:13px; max-width:100%; }
 .calculator-heading,.weather-header { display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; }
 .calculator-heading h2,.weather-header h2,.system-control-heading h2 { margin:0 0 4px; }
@@ -1145,10 +1145,8 @@ const apps = {
     taskmanager: {title:"Task-Manager",icon:"🗂️"},
     appcenter: {title:"App-Center",icon:"🛍️"},
     browser: {title:"Browser",icon:"🌐"},
-    settings: {title:"Einstellungen",icon:"⚙️"},
     terminal: {title:"Terminal",icon:"⌨️"},
     about: {title:"Über THYQORA",icon:"💻"},
-    designcenter: {title:"Design-Center",icon:"🎨"},
     gamecenter: {title:"Game-Center",icon:"🎮"},
     calculator: {title:"Taschenrechner",icon:"🧮"},
     systemcontrol: {title:"Systemsteuerung",icon:"🛠️"},
@@ -1156,7 +1154,7 @@ const apps = {
 };
 
 // System-Apps bleiben immer installiert. Optionale Apps werden pro Konto gespeichert.
-const CORE_APPS = ["taskmanager", "appcenter", "browser", "settings", "terminal"];
+const CORE_APPS = ["taskmanager", "appcenter", "browser", "systemcontrol", "terminal"];
 const APP_CATALOG = {
     monitor: {
         title: "Systemmonitor",
@@ -1167,11 +1165,6 @@ const APP_CATALOG = {
         title: "Über THYQORA",
         icon: "💻",
         description: "Zeigt Informationen über THYQORA OS und dein Konto."
-    },
-    designcenter: {
-        title: "Design-Center",
-        icon: "🎨",
-        description: "Passe Akzentfarben und Desktop-Hintergründe an."
     },
     gamecenter: {
         title: "Game-Center",
@@ -1196,7 +1189,7 @@ const APP_CATALOG = {
 };
 let installedApps = [...CORE_APPS];
 let savedGames = [];
-const DEFAULT_DESKTOP_SHORTCUTS = ["taskmanager", "appcenter", "browser", "settings", "terminal", "trash"];
+const DEFAULT_DESKTOP_SHORTCUTS = ["taskmanager", "appcenter", "browser", "systemcontrol", "terminal", "trash"];
 let desktopShortcuts = [...DEFAULT_DESKTOP_SHORTCUTS];
 let selectedDesktopApp = null;
 const DEFAULT_DESKTOP_WIDGETS = ["clock", "date", "system"];
@@ -1389,7 +1382,7 @@ async function loadCloudSettings() {
 
         const loadedApps = readValue("thyqoraInstalledApps");
         installedApps = Array.isArray(loadedApps)
-            ? [...new Set([...CORE_APPS, ...loadedApps.filter(id => Object.prototype.hasOwnProperty.call(APP_CATALOG, id))])]
+            ? [...new Set([...CORE_APPS, ...loadedApps.filter(id => Object.prototype.hasOwnProperty.call(APP_CATALOG, id) && id !== "designcenter")])]
             : [...CORE_APPS];
 
         const loadedWeatherCity = readValue("thyqoraWeatherCity");
@@ -1402,8 +1395,9 @@ async function loadCloudSettings() {
 
         const loadedShortcuts = readValue("thyqoraDesktopShortcuts");
         desktopShortcuts = Array.isArray(loadedShortcuts)
-            ? [...new Set(loadedShortcuts.filter(id => id === "trash" || (apps[id] && isAppInstalled(id))))]
+            ? [...new Set(loadedShortcuts.map(id => id === "settings" || id === "designcenter" ? "systemcontrol" : id).filter(id => id === "trash" || (apps[id] && isAppInstalled(id))))]
             : [...DEFAULT_DESKTOP_SHORTCUTS];
+        if (!desktopShortcuts.includes("systemcontrol")) desktopShortcuts.push("systemcontrol");
 
         const loadedWidgets = readValue("thyqoraDesktopWidgets");
         desktopWidgets = Array.isArray(loadedWidgets)
@@ -3095,7 +3089,7 @@ function systemControlContent() {
         Object.entries(wallpapers).map(([number,background]) => "<button type='button' class='control-wallpaper " + (Number(settings.background) === Number(number) ? "selected" : "") + "' data-wallpaper='" + number + "' style='background:" + background + "' aria-label='Hintergrund " + number + "' title='Hintergrund " + number + "' onclick='setBackground(" + number + ")'></button>").join("") +
         "</div></section>" +
         "<section class='control-section'><h3>🔊 THYQORA-Lautstärke</h3><div class='control-volume-row'><input class='system-control-volume' type='range' min='0' max='100' value='" + settings.volume + "' oninput='setVolume(this.value)' aria-label='THYQORA-Lautstärke'><strong class='system-control-volume-value'>" + settings.volume + "%</strong></div><p class='monitor-note'>Dieser Regler speichert die Lautstärke-Einstellung in THYQORA OS. Er verändert nicht die Windows-Lautstärke.</p></section>" +
-        "<section class='control-section control-account'><h3>👤 Konto und System</h3><div><span>Angemeldet als</span><strong>" + escapeHTML(currentUsername || "Unbekannt") + "</strong></div><div><span>Version</span><strong>THYQORA OS 0.10</strong></div><div><span>Cloud-Speicher</span><strong>" + (cloudReady ? "Verbunden" : "Nicht verbunden") + "</strong></div><button type='button' onclick='logout()'>Abmelden</button></section></div>";
+        "<section class='control-section control-account'><h3>👤 Konto und System</h3><div><span>Angemeldet als</span><strong>" + escapeHTML(currentUsername || "Unbekannt") + "</strong></div><div><span>Version</span><strong>THYQORA OS 0.11</strong></div><div><span>Cloud-Speicher</span><strong>" + (cloudReady ? "Verbunden" : "Nicht verbunden") + "</strong></div><button type='button' onclick='logout()'>Abmelden</button></section></div>";
 }
 
 
@@ -3210,10 +3204,6 @@ function getAppContent(app) {
         return gameCenterContent();
     }
 
-    if (app === "settings") return settingsContent();
-
-    if (app === "designcenter") return designCenterContent();
-
     if (app === "calculator") return calculatorContent();
 
     if (app === "systemcontrol") return systemControlContent();
@@ -3249,7 +3239,7 @@ function getAppContent(app) {
         return `
             <div class="terminal">
                 <div id="terminalOutput">
-                    THYQORA TERMINAL [Version 0.10]<br>
+                    THYQORA TERMINAL [Version 0.11]<br>
                     Schreibe help für alle Befehle.<br><br>
                 </div>
 
@@ -3265,7 +3255,7 @@ function getAppContent(app) {
     if (app === "about") {
         return `
             <h2>💻 THYQORA OS</h2>
-            <p>Version 0.10</p>
+            <p>Version 0.11</p>
             <p>Ein eigenes browserbasiertes Betriebssystem.</p>
 
             <h3>Systeminformationen</h3>
@@ -4213,7 +4203,7 @@ function appCenterContent() {
         <div class="system-monitor">
             <div>
                 <h2 style="margin:0">🛍️ App-Center</h2>
-                <p class="monitor-note">Installiere und verwalte deine THYQORA-Apps. Neu in Version 0.10: Taschenrechner, Systemsteuerung und Wetter.</p>
+                <p class="monitor-note">Installiere und verwalte deine THYQORA-Apps. Neu in Version 0.11: Taschenrechner, Systemsteuerung und Wetter.</p>
             </div>
             <h3 class="store-section-title">Installierte Apps</h3>
             <div id="appCenterInstalled" class="store-list"></div>
@@ -4403,7 +4393,7 @@ function runCommand() {
     } else if (command === "about") {
         result = "THYQORA OS – ein browserbasiertes Betriebssystem.";
     } else if (command === "version") {
-        result = "THYQORA OS Version 0.10";
+        result = "THYQORA OS Version 0.11";
     } else if (command === "date") {
         result = new Date().toLocaleDateString("de-DE");
     } else if (command === "time") {
@@ -4413,7 +4403,7 @@ function runCommand() {
     } else if (command === "uptime") {
         result = "Diese Sitzung läuft seit " + formatSessionUptime() + ".";
     } else if (command === "sysinfo" || command === "system") {
-        result = "THYQORA OS 0.10 | Browser: " + navigator.userAgent +
+        result = "THYQORA OS 0.11 | Browser: " + navigator.userAgent +
             " | " + navigator.hardwareConcurrency + " logische CPU-Kerne" +
             " | Bildschirm: " + screen.width + "x" + screen.height;
     } else if (command === "memory" || command === "ram") {
@@ -4443,7 +4433,7 @@ function runCommand() {
         const target = args.toLowerCase();
         const aliases = {systemmonitor:"monitor", monitor:"monitor", taskmanager:"taskmanager",
             "task-manager":"taskmanager", appcenter:"appcenter", "app-center":"appcenter",
-            browser:"browser", einstellungen:"settings", settings:"settings", terminal:"terminal", about:"about",
+            browser:"browser", einstellungen:"systemcontrol", settings:"systemcontrol", terminal:"terminal", about:"about",
             rechner:"calculator", calculator:"calculator", taschenrechner:"calculator",
             systemsteuerung:"systemcontrol", systemcontrol:"systemcontrol", wetter:"weather", weather:"weather"};
         const app = aliases[target];
