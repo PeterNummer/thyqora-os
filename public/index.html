@@ -1307,9 +1307,9 @@ function recordGameProgress(id, values = {}) {
     if (!gameProgress[id] || typeof gameProgress[id] !== "object") gameProgress[id] = {};
     const stats = gameProgress[id];
     Object.entries(values).forEach(([key, value]) => {
-        if (["bestScore", "bestTile", "bestMoves"].includes(key) && Number.isFinite(Number(value))) {
+        if (["bestScore", "bestTile"].includes(key) && Number.isFinite(Number(value))) {
             stats[key] = stats[key] === undefined ? Number(value) : Math.max(Number(stats[key]), Number(value));
-        } else if (key === "bestMs" && Number.isFinite(Number(value))) {
+        } else if (["bestMoves", "bestMs"].includes(key) && Number.isFinite(Number(value))) {
             stats[key] = stats[key] === undefined ? Number(value) : Math.min(Number(stats[key]), Number(value));
         } else if (["wins", "draws", "completed"].includes(key)) {
             stats[key] = (Number(stats[key]) || 0) + Number(value || 0);
