@@ -2504,9 +2504,7 @@ function gameCenterContent() {
             <div class="game-stage-toolbar">
                 <button type="button" onclick="toggleGameFullscreen()">⛶ Vollbild</button>
             </div>
-            <div class="game-stage" id="gameStage">
-                <div class="empty-state">Wähle ein Spiel aus der Bibliothek, um loszulegen.</div>
-            </div>
+            <div class="game-stage" id="gameStage" style="display:none"></div>
         </div>
     `;
 }
@@ -2564,24 +2562,45 @@ function renderExternalGameLibrary() {
         grid.appendChild(card);
     });
 }
+function closeGameSession() {
+    const stage = document.getElementById("gameStage");
+    if (!stage) return;
+
+    if (snakeTimer) {
+        clearInterval(snakeTimer);
+        snakeTimer = null;
+    }
+    document.onkeydown = null;
+    snakeState = null;
+
+    stage.dataset.active = "false";
+    stage.innerHTML = "";
+    stage.style.display = "none";
+
+    if (document.fullscreenElement === stage) {
+        document.exitFullscreen?.();
+    }
+}
+
 function addFullscreenExitButton(stage) {
     const button = document.createElement("button");
     button.type = "button";
     button.className = "fullscreen-exit-button";
-    button.textContent = "✕ Vollbild beenden";
-    button.setAttribute("aria-label", "Vollbildmodus beenden");
-    button.onclick = () => {
-        if (document.fullscreenElement) document.exitFullscreen?.();
-    };
+    button.textContent = "✕ Beenden";
+    button.setAttribute("aria-label", "Spiel beenden und schließen");
+    button.onclick = closeGameSession;
     stage.appendChild(button);
 }
 
 function toggleGameFullscreen() {
     const stage = document.getElementById("gameStage");
-    if (!stage) return;
+    if (!stage || stage.dataset.active !== "true") {
+        notify("Kein Spiel geöffnet", "Starte zuerst ein Spiel aus der Bibliothek.");
+        return;
+    }
 
-    if (document.fullscreenElement) {
-        document.exitFullscreen?.();
+    if (document.fullscreenElement === stage) {
+        closeGameSession();
         return;
     }
 
@@ -2606,11 +2625,19 @@ function launchExternalGame(id) {
     const stage = document.getElementById("gameStage");
     if (!game || !stage) return;
 
-    // Direkt im Klick-Ereignis Vollbild anfordern, damit der Browser es erlaubt.
+    stage.style.display = "flex";
+    stage.dataset.active = "true";
+
+    // Das Spiel wird direkt beim Anklicken im Vollbild geöffnet.
     if (stage.requestFullscreen && !document.fullscreenElement) {
         stage.requestFullscreen().catch(() => {
-            notify("Vollbild nicht verfügbar", "Du kannst den Vollbildmodus über die Schaltfläche starten.");
+            notify("Vollbild nicht verfügbar", "Das Spiel kann in diesem Browser nicht im Vollbild gestartet werden.");
+            closeGameSession();
         });
+    } else if (!stage.requestFullscreen) {
+        notify("Vollbild nicht unterstützt", "Dein Browser unterstützt den Vollbildmodus hier nicht.");
+        closeGameSession();
+        return;
     }
 
     stage.innerHTML = "";
@@ -2653,11 +2680,19 @@ function launchBuiltinGame(name) {
     const stage = document.getElementById("gameStage");
     if (!stage) return;
 
+    stage.style.display = "flex";
+    stage.dataset.active = "true";
+
     // Auch die eingebauten Spiele starten direkt im Vollbild.
     if (stage.requestFullscreen && !document.fullscreenElement) {
         stage.requestFullscreen().catch(() => {
-            notify("Vollbild nicht verfügbar", "Du kannst den Vollbildmodus über die Schaltfläche starten.");
+            notify("Vollbild nicht verfügbar", "Das Spiel kann in diesem Browser nicht im Vollbild gestartet werden.");
+            closeGameSession();
         });
+    } else if (!stage.requestFullscreen) {
+        notify("Vollbild nicht unterstützt", "Dein Browser unterstützt den Vollbildmodus hier nicht.");
+        closeGameSession();
+        return;
     }
 
     if (name === "snake") {
