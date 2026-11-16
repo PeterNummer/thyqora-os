@@ -584,16 +584,35 @@ body.authenticated #authScreen {
 .browser-view { position:relative; flex:1 1 auto; min-height:0; height:100%; background:#fff; border:1px solid #ffffff30; border-radius:8px; overflow:hidden; }
 .browser-view iframe { width:100%; height:100%; min-height:100%; display:block; border:0; background:white; }
 .browser-status { flex:0 0 auto; margin:0; min-height:18px; color:#a9bfd8; font-size:12px; }
-.game-center { display:flex; flex:1 1 auto; flex-direction:column; gap:7px; height:100%; min-height:0; overflow:hidden; }
+.game-center { display:flex; flex:1 1 auto; flex-direction:column; gap:8px; height:100%; min-height:0; overflow:hidden; }
 .game-presets { display:grid; grid-auto-flow:column; grid-auto-columns:minmax(130px,1fr); grid-template-rows:1fr; gap:8px; overflow-x:auto; overflow-y:hidden; flex:0 0 auto; padding:2px 2px 7px; -webkit-overflow-scrolling:touch; }
+.game-library { display:flex; flex:0 1 42%; min-height:145px; flex-direction:column; gap:8px; overflow:hidden; }
+.game-library-toolbar { display:flex; align-items:center; gap:8px; flex-wrap:wrap; flex:0 0 auto; }
+.game-library-search { flex:1 1 190px; min-width:130px; max-width:none; margin:0 !important; padding:10px 12px; color:white; background:#071525; border:1px solid #ffffff30; border-radius:8px; outline:none; }
+.game-category-list { display:flex; gap:6px; overflow-x:auto; flex:0 0 auto; padding:2px 1px 5px; }
+.game-category { flex:0 0 auto; margin:0 !important; padding:7px 11px !important; border:1px solid #ffffff25 !important; border-radius:20px !important; background:#ffffff0d !important; color:#c7d8eb !important; font-size:12px; }
+.game-category.active { background:var(--accent) !important; border-color:var(--accent) !important; color:white !important; }
+.game-library-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(155px,1fr)); gap:8px; overflow:auto; min-height:0; padding:2px 3px 8px 1px; align-content:start; }
+.game-library-card { display:flex; min-width:0; flex-direction:column; gap:5px; padding:10px; border:1px solid #ffffff20; border-radius:10px; background:#ffffff0d; }
+.game-library-card .game-library-card-top { display:flex; align-items:center; gap:8px; min-width:0; }
+.game-library-card .game-library-icon { font-size:22px; flex:0 0 auto; }
+.game-library-card strong { font-size:13px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.game-library-card small { min-height:29px; color:#b9c8dd; font-size:11px; line-height:1.35; }
+.game-library-card button { width:100%; margin:0 !important; padding:7px 9px !important; font-size:12px; }
+.game-library-empty { grid-column:1/-1; padding:18px; color:#b9c8dd; text-align:center; background:#ffffff09; border-radius:9px; }
 @media(max-width:1024px) and (pointer:coarse) {
     .game-center { gap:9px; }
     .game-presets { grid-auto-columns:minmax(145px, 180px); }
-    .game-stage { min-height:260px; }
+    .game-library { flex-basis:44%; min-height:130px; }
+    .game-library-grid { grid-template-columns:repeat(auto-fill,minmax(145px,1fr)); }
+    .game-stage { min-height:220px; }
     .game-tile { min-height:86px; max-height:none; }
 }
 @media(max-width:760px) {
-    .game-stage { min-height:220px; }
+    .game-stage { min-height:170px; }
+    .game-library { flex-basis:46%; min-height:120px; }
+    .game-library-grid { grid-template-columns:repeat(auto-fill,minmax(132px,1fr)); gap:6px; }
+    .game-library-card { padding:8px; }
     .game-help { line-height:1.4; }
 }
 .game-tile { display:flex; flex-direction:column; align-items:flex-start; justify-content:center; gap:4px; min-height:78px; max-height:88px; padding:9px !important; margin:0 !important; text-align:left; background:#ffffff10 !important; }
@@ -2392,25 +2411,72 @@ function emptyTrash() {
 ===================================== */
 
 const externalGameCatalog = [
-    {id:"orbit-brake",name:"Orbit Brake",icon:"🪐",description:"Ein Geschicklichkeitsspiel mit Schwerkraft.",url:"https://www.uploadarcade.com/embed/orbit-brake",page:"https://www.uploadarcade.com/games/orbit-brake"},
-    {id:"parcel-panic",name:"Parcel Panic",icon:"📦",description:"Sortiere Pakete, bevor das Band vollläuft.",url:"https://www.uploadarcade.com/embed/parcel-panic",page:"https://www.uploadarcade.com/games/parcel-panic"},
-    {id:"lantern-lines",name:"Lantern Lines",icon:"🏮",description:"Verbinde passende Punkte ohne Kreuzungen.",url:"https://www.uploadarcade.com/embed/lantern-lines",page:"https://www.uploadarcade.com/games/lantern-lines"},
-    {id:"cloud-courier",name:"Cloud Courier",icon:"☁️",description:"Halte einen kleinen Kurier in der Luft.",url:"https://www.uploadarcade.com/embed/cloud-courier",page:"https://www.uploadarcade.com/games/cloud-courier"},
-    {id:"signal-garden",name:"Signal Garden",icon:"🌱",description:"Merke dir Muster und wiederhole sie.",url:"https://www.uploadarcade.com/embed/signal-garden",page:"https://www.uploadarcade.com/games/signal-garden"},
-    {id:"color-relay",name:"Color Relay",icon:"🎨",description:"Reagiere schnell und passe die Farben an.",url:"https://www.uploadarcade.com/embed/color-relay",page:"https://www.uploadarcade.com/games/color-relay",provider:"Upload Arcade"},
-    {id:"pocket-reactor",name:"Pocket Reactor",icon:"⚛️",description:"Löse ein kleines Energie- und Logikrätsel.",url:"https://www.uploadarcade.com/embed/pocket-reactor",page:"https://www.uploadarcade.com/games/pocket-reactor",provider:"Upload Arcade"},
-    {id:"hextris",name:"Hextris",icon:"⬡",description:"Ordne fallende Formen geschickt an.",url:"https://playbolt.app/play/hextris/",page:"https://playbolt.app/embed/",provider:"PlayBolt"},
-    {id:"astray",name:"Astray",icon:"🌀",description:"Finde den Weg durch ein Labyrinth.",url:"https://playbolt.app/play/astray/",page:"https://playbolt.app/embed/",provider:"PlayBolt"},
-    {id:"tetris",name:"Tetris",icon:"🧱",description:"Staple fallende Blöcke und bilde Reihen.",url:"https://playbolt.app/play/tetris/",page:"https://playbolt.app/embed/",provider:"PlayBolt"},
-    {id:"breakout",name:"Breakout",icon:"🟦",description:"Zerstöre alle Blöcke mit dem Ball.",url:"https://playbolt.app/play/breakout/",page:"https://playbolt.app/embed/",provider:"PlayBolt"}
-];
+    {id:"orbit-brake",name:"Orbit Brake",icon:"🪐",description:"Ein Geschicklichkeitsspiel mit Schwerkraft.",category:"Arcade",url:"https://www.uploadarcade.com/embed/orbit-brake",page:"https://www.uploadarcade.com/games/orbit-brake",provider:"Upload Arcade"},
+    {id:"parcel-panic",name:"Parcel Panic",icon:"📦",description:"Sortiere Pakete, bevor das Band vollläuft.",category:"Puzzle",url:"https://www.uploadarcade.com/embed/parcel-panic",page:"https://www.uploadarcade.com/games/parcel-panic",provider:"Upload Arcade"},
+    {id:"lantern-lines",name:"Lantern Lines",icon:"🏮",description:"Verbinde passende Punkte ohne Kreuzungen.",category:"Puzzle",url:"https://www.uploadarcade.com/embed/lantern-lines",page:"https://www.uploadarcade.com/games/lantern-lines",provider:"Upload Arcade"},
+    {id:"cloud-courier",name:"Cloud Courier",icon:"☁️",description:"Halte einen kleinen Kurier in der Luft.",category:"Arcade",url:"https://www.uploadarcade.com/embed/cloud-courier",page:"https://www.uploadarcade.com/games/cloud-courier",provider:"Upload Arcade"},
+    {id:"signal-garden",name:"Signal Garden",icon:"🌱",description:"Merke dir Muster und wiederhole sie.",category:"Puzzle",url:"https://www.uploadarcade.com/embed/signal-garden",page:"https://www.uploadarcade.com/games/signal-garden",provider:"Upload Arcade"},
+    {id:"color-relay",name:"Color Relay",icon:"🎨",description:"Reagiere schnell und passe die Farben an.",category:"Geschicklichkeit",url:"https://www.uploadarcade.com/embed/color-relay",page:"https://www.uploadarcade.com/games/color-relay",provider:"Upload Arcade"},
+    {id:"pocket-reactor",name:"Pocket Reactor",icon:"⚛️",description:"Löse ein kleines Energie- und Logikrätsel.",category:"Puzzle",url:"https://www.uploadarcade.com/embed/pocket-reactor",page:"https://www.uploadarcade.com/games/pocket-reactor",provider:"Upload Arcade"},
+    {id:"hextris",name:"Hextris",icon:"⬡",description:"Ordne fallende Formen geschickt an.",category:"Puzzle",url:"https://playbolt.app/play/hextris/",page:"https://playbolt.app/de/games/",provider:"PlayBolt"},
+    {id:"astray",name:"Astray",icon:"🌀",description:"Finde den Weg durch ein Labyrinth.",category:"Puzzle",url:"https://playbolt.app/play/astray/",page:"https://playbolt.app/de/games/",provider:"PlayBolt"},
+    {id:"tetris",name:"Tetris",icon:"🧱",description:"Staple fallende Blöcke und bilde Reihen.",category:"Puzzle",url:"https://playbolt.app/play/tetris/",page:"https://playbolt.app/de/games/",provider:"PlayBolt"},
+    {id:"breakout",name:"Breakout",icon:"🟦",description:"Lenke den Ball und räume alle Blöcke ab.",category:"Arcade",url:"https://playbolt.app/play/breakout/",page:"https://playbolt.app/de/games/",provider:"PlayBolt"},
+    {id:"floppy-bird",name:"Floppy Bird",icon:"🐤",description:"Flattere geschickt durch die Hindernisse.",category:"Arcade",url:"https://playbolt.app/play/floppy-bird/",page:"https://playbolt.app/de/games/",provider:"PlayBolt"},
+    {id:"t-rex-runner",name:"T-Rex Runner",icon:"🦖",description:"Springe mit dem Dino über Hindernisse.",category:"Arcade",url:"https://playbolt.app/play/t-rex-runner/",page:"https://playbolt.app/de/games/",provider:"PlayBolt"},
+    {id:"tower-game",name:"Tower Game",icon:"🏗️",description:"Staple Bauteile möglichst präzise.",category:"Geschicklichkeit",url:"https://playbolt.app/play/tower-game/",page:"https://playbolt.app/de/games/",provider:"PlayBolt"},
+    {id:"minesweeper",name:"Minesweeper",icon:"💡",description:"Finde alle sicheren Felder mit Logik.",category:"Puzzle",url:"https://playbolt.app/play/minesweeper/",page:"https://playbolt.app/de/games/",provider:"PlayBolt"},
+    {id:"memory-match",name:"Memory Match",icon:"🧠",description:"Finde zusammengehörige Kartenpaare.",category:"Puzzle",url:"https://playbolt.app/play/memory-match/",page:"https://playbolt.app/de/games/",provider:"PlayBolt"},
+    {id:"sliding-puzzle",name:"Sliding Puzzle",icon:"🧩",description:"Bringe die Zahlen oder Teile in die richtige Reihenfolge.",category:"Puzzle",url:"https://playbolt.app/play/sliding-puzzle/",page:"https://playbolt.app/de/games/",provider:"PlayBolt"},
+    {id:"snake",name:"Snake",icon:"🐍",description:"Sammle Punkte und werde immer länger.",category:"Arcade",url:"https://playbolt.app/play/snake/",page:"https://playbolt.app/de/games/",provider:"PlayBolt"},
+    {id:"whack-a-mole",name:"Whack-a-Mole",icon:"🔨",description:"Triff die auftauchenden Ziele möglichst schnell.",category:"Geschicklichkeit",url:"https://playbolt.app/play/whack-a-mole/",page:"https://playbolt.app/de/games/",provider:"PlayBolt"},
+    {id:"neon-pong",name:"Neon Pong",icon:"🏓",description:"Halte den Ball im Spiel und sammle Punkte.",category:"Arcade",url:"https://playbolt.app/play/neon-pong/",page:"https://playbolt.app/de/games/",provider:"PlayBolt"},
+    {id:"piano-tiles",name:"Piano Tiles",icon:"🎹",description:"Tippe die richtigen Tasten im Takt an.",category:"Geschicklichkeit",url:"https://playbolt.app/play/piano-tiles/",page:"https://playbolt.app/de/games/",provider:"PlayBolt"},
+    {id:"sky-hopper",name:"Sky Hopper",icon:"☁️",description:"Springe von Plattform zu Plattform.",category:"Arcade",url:"https://playbolt.app/play/sky-hopper/",page:"https://playbolt.app/de/games/",provider:"PlayBolt"},
+    {id:"lights-out",name:"Lights Out",icon:"💡",description:"Schalte mit möglichst wenigen Zügen alle Lichter aus.",category:"Puzzle",url:"https://playbolt.app/play/lights-out/",page:"https://playbolt.app/de/games/",provider:"PlayBolt"},
+    {id:"sudoku",name:"Sudoku",icon:"🔢",description:"Fülle das Zahlenraster logisch aus.",category:"Puzzle",url:"https://playbolt.app/play/sudoku/",page:"https://playbolt.app/de/games/",provider:"PlayBolt"},
+    {id:"nonogram",name:"Nonogram",icon:"🖼️",description:"Löse das Bildrätsel mit Zahlenhinweisen.",category:"Puzzle",url:"https://playbolt.app/play/nonogram/",page:"https://playbolt.app/de/games/",provider:"PlayBolt"},
+    {id:"sokoban",name:"Sokoban",icon:"📦",description:"Schiebe Kisten an die vorgesehenen Plätze.",category:"Puzzle",url:"https://playbolt.app/play/sokoban/",page:"https://playbolt.app/de/games/",provider:"PlayBolt"},
+    {id:"connect-four",name:"Connect Four",icon:"🔴",description:"Verbinde vier Spielsteine in einer Reihe.",category:"Klassiker",url:"https://playbolt.app/play/connect-four/",page:"https://playbolt.app/de/games/",provider:"PlayBolt"},
+    {id:"reversi",name:"Reversi",icon:"⚫",description:"Drehe gegnerische Steine um und sichere das Feld.",category:"Klassiker",url:"https://playbolt.app/play/reversi/",page:"https://playbolt.app/de/games/",provider:"PlayBolt"},
+    {id:"hangman",name:"Hangman",icon:"🔤",description:"Errate das gesuchte Wort Buchstabe für Buchstabe.",category:"Wörter",url:"https://playbolt.app/play/hangman/",page:"https://playbolt.app/de/games/",provider:"PlayBolt"},
+    {id:"simon-says",name:"Simon Says",icon:"🎨",description:"Merke dir die Reihenfolge der Farben.",category:"Geschicklichkeit",url:"https://playbolt.app/play/simon-says/",page:"https://playbolt.app/de/games/",provider:"PlayBolt"},
+    {id:"typing-test",name:"Typing Test",icon:"⌨️",description:"Teste deine Tippgeschwindigkeit.",category:"Wörter",url:"https://playbolt.app/play/typing-test/",page:"https://playbolt.app/de/games/",provider:"PlayBolt"},
+    {id:"word-search",name:"Wörtersuche",icon:"🔎",description:"Finde versteckte Wörter im Buchstabenfeld.",category:"Wörter",url:"https://playbolt.app/play/word-search/",page:"https://playbolt.app/de/games/",provider:"PlayBolt"},
+    {id:"word-guess",name:"Word Guess",icon:"📝",description:"Finde das gesuchte Wort mit Hinweisen.",category:"Wörter",url:"https://playbolt.app/play/word-guess/",page:"https://playbolt.app/de/games/",provider:"PlayBolt"},
+    {id:"anagrams",name:"Anagrams",icon:"🔠",description:"Ordne Buchstaben zu sinnvollen Wörtern.",category:"Wörter",url:"https://playbolt.app/play/anagrams/",page:"https://playbolt.app/de/games/",provider:"PlayBolt"},
+    {id:"missing-letter",name:"Missing Letter",icon:"🔤",description:"Ergänze den fehlenden Buchstaben.",category:"Wörter",url:"https://playbolt.app/play/missing-letter/",page:"https://playbolt.app/de/games/",provider:"PlayBolt"},
+    {id:"capitals-quiz",name:"Hauptstädte-Quiz",icon:"🌍",description:"Teste dein Wissen über Hauptstädte.",category:"Quiz",url:"https://playbolt.app/play/capitals-quiz/",page:"https://playbolt.app/de/games/",provider:"PlayBolt"},
+    {id:"math-sprint",name:"Math Sprint",icon:"➗",description:"Löse Rechenaufgaben möglichst flott.",category:"Quiz",url:"https://playbolt.app/play/math-sprint/",page:"https://playbolt.app/de/games/",provider:"PlayBolt"},
+    {id:"general-knowledge",name:"Allgemeinwissen-Quiz",icon:"🧠",description:"Beantworte Fragen aus verschiedenen Themen.",category:"Quiz",url:"https://playbolt.app/play/general-knowledge/",page:"https://playbolt.app/de/games/",provider:"PlayBolt"},
+    {id:"true-or-false",name:"Wahr oder falsch",icon:"❔",description:"Entscheide, ob Aussagen stimmen.",category:"Quiz",url:"https://playbolt.app/play/true-or-false/",page:"https://playbolt.app/de/games/",provider:"PlayBolt"},
+    {id:"solitaire",name:"Solitaire",icon:"🃏",description:"Sortiere die Karten nach den Spielregeln.",category:"Klassiker",url:"https://playbolt.app/play/solitaire/",page:"https://playbolt.app/de/games/",provider:"PlayBolt"},
+    {id:"checkers",name:"Dame",icon:"⚪",description:"Spiele Dame gegen eine andere Person.",category:"Klassiker",url:"https://playbolt.app/play/checkers/",page:"https://playbolt.app/de/games/",provider:"PlayBolt"},
+    {id:"mancala",name:"Mancala",icon:"🟤",description:"Verteile Spielsteine und plane deine Züge.",category:"Klassiker",url:"https://playbolt.app/play/mancala/",page:"https://playbolt.app/de/games/",provider:"PlayBolt"},
+    {id:"dots-and-boxes",name:"Punkte und Kästchen",icon:"🔲",description:"Verbinde Punkte und vervollständige Kästchen.",category:"Klassiker",url:"https://playbolt.app/play/dots-and-boxes/",page:"https://playbolt.app/de/games/",provider:"PlayBolt"},
+    {id:"tic-tac-toe",name:"Tic-Tac-Toe",icon:"⭕",description:"Drei in einer Reihe – gegen Freunde oder CPU.",category:"Klassiker",url:"https://playbolt.app/play/tic-tac-toe/",page:"https://playbolt.app/de/games/",provider:"PlayBolt"},
+    {id:"table-tennis",name:"Tischtennis",icon:"🏓",description:"Spiele eine schnelle Runde Tischtennis.",category:"Arcade",url:"https://playbolt.app/play/table-tennis/",page:"https://playbolt.app/de/games/",provider:"PlayBolt"},
+    {id:"air-hockey",name:"Air Hockey",icon:"🏒",description:"Schiebe den Puck ins gegnerische Tor.",category:"Arcade",url:"https://playbolt.app/play/air-hockey/",page:"https://playbolt.app/de/games/",provider:"PlayBolt"},
+    {id:"reaction-duel",name:"Reaktionsduell",icon:"⚡",description:"Reagiere im richtigen Moment schneller als dein Gegner.",category:"Geschicklichkeit",url:"https://playbolt.app/play/reaction-duel/",page:"https://playbolt.app/de/games/",provider:"PlayBolt"},
+    {id:"turbo-lane",name:"Turbo Lane",icon:"🚗",description:"Weiche Hindernissen aus und bleib auf Kurs.",category:"Arcade",url:"https://playbolt.app/play/turbo-lane/",page:"https://playbolt.app/de/games/",provider:"PlayBolt"},
+    {id:"city-dash",name:"City Dash",icon:"🏙️",description:"Flitze durch die Stadt und weiche Hindernissen aus.",category:"Arcade",url:"https://playbolt.app/play/city-dash/",page:"https://playbolt.app/de/games/",provider:"PlayBolt"},
+    {id:"neon-runner-3d",name:"Neon Runner 3D",icon:"🏃",description:"Wechsle Spuren und springe über Hindernisse.",category:"Arcade",url:"https://playbolt.app/play/neon-runner-3d/",page:"https://playbolt.app/de/games/",provider:"PlayBolt"},
+    {id:"life-replay",name:"Life Replay",icon:"🌱",description:"Triff Entscheidungen in einer kleinen Lebenssimulation.",category:"Casual",url:"https://playbolt.app/play/life-replay/",page:"https://playbolt.app/de/games/",provider:"PlayBolt"},
+    {id:"rope-snack",name:"Rope Snack",icon:"🍓",description:"Löse Physikrätsel mit Seilen und Blasen.",category:"Puzzle",url:"https://playbolt.app/play/rope-snack/",page:"https://playbolt.app/de/games/",provider:"PlayBolt"},
+    {id:"unbolted",name:"Unbolted",icon:"🔩",description:"Entferne Schrauben in der richtigen Reihenfolge.",category:"Puzzle",url:"https://playbolt.app/play/unbolted/",page:"https://playbolt.app/de/games/",provider:"PlayBolt"},
+    {id:"merge-drop",name:"Merge Drop",icon:"🔵",description:"Kombiniere gleiche Teile zu größeren Elementen.",category:"Puzzle",url:"https://playbolt.app/play/merge-drop/",page:"https://playbolt.app/de/games/",provider:"PlayBolt"},
+    {id:"block-puzzle",name:"Block Puzzle",icon:"🧩",description:"Fülle Reihen und Spalten mit Formen.",category:"Puzzle",url:"https://playbolt.app/play/block-puzzle/",page:"https://playbolt.app/de/games/",provider:"PlayBolt"},
+    {id:"water-sort",name:"Water Sort",icon:"🧪",description:"Sortiere farbige Flüssigkeiten in passende Gefäße.",category:"Puzzle",url:"https://playbolt.app/play/water-sort/",page:"https://playbolt.app/de/games/",provider:"PlayBolt"}
+];;
+
+let selectedExternalGameCategory = "Alle";
 
 function gameCenterContent() {
     return `
         <div class="game-center">
             <div>
                 <h2 style="margin:0">🎮 Game-Center</h2>
-                <p class="game-help">Wähle ein Spiel aus. Die eigenen THYQORA-Spiele und externe HTML5-Spiele starten direkt in diesem Fenster.</p>
+                <p class="game-help">Durchsuche die Spielebibliothek oder wähle eines der THYQORA-Spiele. Externe Spiele starten direkt hier im Fenster.</p>
             </div>
             <h3 class="store-section-title" style="margin:2px 0">THYQORA-Spiele</h3>
             <div class="game-presets">
@@ -2421,24 +2487,83 @@ function gameCenterContent() {
                 <button type="button" class="game-tile" onclick="launchBuiltinGame('reaction')"><span>⚡</span><strong>Reaktionstest</strong><small>Teste dein Reaktionsvermögen.</small></button>
                 <button type="button" class="game-tile" onclick="launchBuiltinGame('2048')"><span>🔢</span><strong>2048</strong><small>Kombiniere gleiche Zahlen.</small></button>
             </div>
-            <h3 class="store-section-title" style="margin:2px 0">Weitere Spiele aus dem Internet</h3>
-            <div class="game-presets">
-                ${externalGameCatalog.map(game => `
-                    <button type="button" class="game-tile" onclick="launchExternalGame('${game.id}')">
-                        <span>${game.icon}</span><strong>${game.name}</strong><small>${game.description}</small>
-                    </button>
-                `).join("")}
+            <div class="game-library">
+                <div>
+                    <h3 class="store-section-title" style="margin:2px 0 6px">Spielebibliothek <span id="gameLibraryCount" style="color:#9eb7d3;font-size:11px;font-weight:400"></span></h3>
+                    <div class="game-library-toolbar">
+                        <input id="gameLibrarySearch" class="game-library-search" type="search" placeholder="🔎 Spiele suchen …" oninput="renderExternalGameLibrary()">
+                    </div>
+                </div>
+                <div class="game-category-list" id="gameCategoryList">
+                    ${["Alle","Arcade","Puzzle","Geschicklichkeit","Casual","Wörter","Quiz","Klassiker"].map(category => `
+                        <button type="button" class="game-category ${category === selectedExternalGameCategory ? "active" : ""}" onclick="setExternalGameCategory('${category}')">${category}</button>
+                    `).join("")}
+                </div>
+                <div class="game-library-grid" id="gameLibraryGrid"></div>
             </div>
             <div class="game-stage-toolbar">
                 <button type="button" onclick="toggleGameFullscreen()">⛶ Vollbild</button>
             </div>
             <div class="game-stage" id="gameStage">
-                <div class="empty-state">Wähle oben ein Spiel aus, um loszulegen.</div>
+                <div class="empty-state">Wähle ein Spiel aus der Bibliothek, um loszulegen.</div>
             </div>
         </div>
     `;
 }
 
+function setExternalGameCategory(category) {
+    selectedExternalGameCategory = category;
+    renderExternalGameLibrary();
+}
+
+function renderExternalGameLibrary() {
+    const grid = document.getElementById("gameLibraryGrid");
+    const categoryList = document.getElementById("gameCategoryList");
+    const search = document.getElementById("gameLibrarySearch");
+    const count = document.getElementById("gameLibraryCount");
+    if (!grid) return;
+
+    const query = (search?.value || "").trim().toLocaleLowerCase("de");
+    const games = externalGameCatalog.filter(game => {
+        const matchesCategory = selectedExternalGameCategory === "Alle" || game.category === selectedExternalGameCategory;
+        const matchesSearch = !query || (game.name + " " + game.description + " " + game.category + " " + (game.provider || "")).toLocaleLowerCase("de").includes(query);
+        return matchesCategory && matchesSearch;
+    });
+
+    if (count) count.textContent = "(" + games.length + " Spiele)";
+    if (categoryList) {
+        categoryList.querySelectorAll(".game-category").forEach(button => {
+            button.classList.toggle("active", button.textContent === selectedExternalGameCategory);
+        });
+    }
+
+    grid.innerHTML = "";
+    if (!games.length) {
+        grid.innerHTML = '<div class="game-library-empty">Keine passenden Spiele gefunden. Ändere deine Suche oder wähle eine andere Kategorie.</div>';
+        return;
+    }
+
+    games.forEach(game => {
+        const card = document.createElement("article");
+        card.className = "game-library-card";
+        const top = document.createElement("div");
+        top.className = "game-library-card-top";
+        const icon = document.createElement("span");
+        icon.className = "game-library-icon";
+        icon.textContent = game.icon;
+        const name = document.createElement("strong");
+        name.textContent = game.name;
+        top.append(icon, name);
+        const description = document.createElement("small");
+        description.textContent = game.description;
+        const button = document.createElement("button");
+        button.type = "button";
+        button.textContent = "▶ Spielen";
+        button.onclick = () => launchExternalGame(game.id);
+        card.append(top, description, button);
+        grid.appendChild(card);
+    });
+}
 function addFullscreenExitButton(stage) {
     const button = document.createElement("button");
     button.type = "button";
