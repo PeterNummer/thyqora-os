@@ -2532,7 +2532,7 @@ const externalGameCatalog = [
 ];;
 
 let selectedExternalGameCategory = "Alle";
-let selectedExternalGameProvider = "Alle Websites";
+let showOtherWebsiteGames = false;
 
 function gameCenterContent() {
     return `
@@ -2556,9 +2556,6 @@ function gameCenterContent() {
                     <h3 class="store-section-title" style="margin:2px 0 6px">Spielebibliothek <span id="gameLibraryCount" style="color:#9eb7d3;font-size:11px;font-weight:400"></span></h3>
                     <div class="game-library-toolbar">
                         <input id="gameLibrarySearch" class="game-library-search" type="search" placeholder="🔎 Spiele suchen …" oninput="renderExternalGameLibrary()">
-                        <select id="gameProviderFilter" class="game-provider-filter" aria-label="Nach Website filtern" onchange="setExternalGameProvider(this.value)">
-                            <option value="Alle Websites">Alle Websites</option>
-                        </select>
                     </div>
                 </div>
                 <div class="game-category-list" id="gameCategoryList">
@@ -2578,8 +2575,8 @@ function setExternalGameCategory(category) {
     renderExternalGameLibrary();
 }
 
-function setExternalGameProvider(provider) {
-    selectedExternalGameProvider = provider || "Alle Websites";
+function toggleOtherWebsiteGames() {
+    showOtherWebsiteGames = !showOtherWebsiteGames;
     renderExternalGameLibrary();
 }
 
@@ -2587,26 +2584,20 @@ function renderExternalGameLibrary() {
     const grid = document.getElementById("gameLibraryGrid");
     const categoryList = document.getElementById("gameCategoryList");
     const search = document.getElementById("gameLibrarySearch");
-    const providerFilter = document.getElementById("gameProviderFilter");
     const count = document.getElementById("gameLibraryCount");
     if (!grid) return;
 
-    if (providerFilter) {
-        const providers = [...new Set(externalGameCatalog.map(game => game.provider || "Unbekannt"))].sort();
-        providerFilter.innerHTML = '<option value="Alle Websites">Alle Websites</option>' +
-            providers.map(provider => '<option value="' + provider.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") + '">' + provider.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") + '</option>').join("");
-        providerFilter.value = selectedExternalGameProvider;
-    }
-
     const query = (search?.value || "").trim().toLocaleLowerCase("de");
-    const games = externalGameCatalog.filter(game => {
+    const matchingGames = externalGameCatalog.filter(game => {
         const matchesCategory = selectedExternalGameCategory === "Alle" || game.category === selectedExternalGameCategory;
-        const matchesProvider = selectedExternalGameProvider === "Alle Websites" || (game.provider || "Unbekannt") === selectedExternalGameProvider;
         const matchesSearch = !query || (game.name + " " + game.description + " " + game.category + " " + (game.provider || "")).toLocaleLowerCase("de").includes(query);
-        return matchesCategory && matchesProvider && matchesSearch;
+        return matchesCategory && matchesSearch;
     });
 
-    if (count) count.textContent = "(" + games.length + " Spiele)";
+    const uploadArcadeGames = matchingGames.filter(game => game.provider === "Upload Arcade");
+    const otherWebsiteGames = matchingGames.filter(game => game.provider !== "Upload Arcade");
+
+    if (count) count.textContent = "(" + matchingGames.length + " Spiele)";
     if (categoryList) {
         categoryList.querySelectorAll(".game-category").forEach(button => {
             button.classList.toggle("active", button.textContent === selectedExternalGameCategory);
@@ -2614,12 +2605,8 @@ function renderExternalGameLibrary() {
     }
 
     grid.innerHTML = "";
-    if (!games.length) {
-        grid.innerHTML = '<div class="game-library-empty">Keine passenden Spiele gefunden. Ändere deine Suche oder wähle eine andere Kategorie.</div>';
-        return;
-    }
 
-    games.forEach(game => {
+    const renderGameCard = game => {
         const card = document.createElement("article");
         card.className = "game-library-card";
         const top = document.createElement("div");
@@ -2634,7 +2621,6 @@ function renderExternalGameLibrary() {
             image.onerror = () => { icon.textContent = game.icon; };
             icon.appendChild(image);
         } else if (game.provider === "PlayBolt") {
-            // PlayBolt zeigt im offiziellen /play/-Player sein eigenes Titel-Cover.
             const cover = document.createElement("iframe");
             cover.className = "game-library-cover-frame";
             cover.src = game.url;
@@ -2658,7 +2644,39 @@ function renderExternalGameLibrary() {
         button.onclick = () => launchExternalGame(game.id);
         card.append(top, description, button);
         grid.appendChild(card);
-    });
+    };
+
+    uploadArcadeGames.forEach(renderGameCard);
+
+    if (otherWebsiteGames.length) {
+        const moreCard = document.createElement("article");
+        moreCard.className = "game-library-card game-more-card";
+        const top = document.createElement("div");
+        top.className = "game-library-card-top";
+        const icon = document.createElement("span");
+        icon.className = "game-library-icon";
+        icon.textContent = "🌐";
+        const name = document.createElement("strong");
+        name.textContent = "Weitere Spiele";
+        top.append(icon, name);
+        const description = document.createElement("small");
+        description.textContent = otherWebsiteGames.length + " Spiele von anderen Websites";
+        const button = document.createElement("button");
+        button.type = "button";
+        button.textContent = showOtherWebsiteGames ? "▲ Weniger Spiele" : "▼ Weitere Spiele anzeigen";
+        button.setAttribute("aria-expanded", String(showOtherWebsiteGames));
+        button.onclick = toggleOtherWebsiteGames;
+        moreCard.append(top, description, button);
+        grid.appendChild(moreCard);
+
+        if (showOtherWebsiteGames) {
+            otherWebsiteGames.forEach(renderGameCard);
+        }
+    }
+
+    if (!matchingGames.length) {
+        grid.innerHTML = '<div class="game-library-empty">Keine passenden Spiele gefunden. Ändere deine Suche oder wähle eine andere Kategorie.</div>';
+    }
 }
 function closeGameSession() {
     const stage = document.getElementById("gameStage");
