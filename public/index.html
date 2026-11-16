@@ -608,6 +608,12 @@ body.authenticated #authScreen {
 .game-library-card strong { font-size:13px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .game-library-card small { min-height:29px; color:#b9c8dd; font-size:11px; line-height:1.35; }
 .game-library-card button { width:100%; margin:0 !important; padding:7px 9px !important; font-size:12px; }
+.game-more-card { border:2px solid var(--accent); background:linear-gradient(135deg, color-mix(in srgb, var(--accent) 20%, #102238), #ffffff0d 75%); box-shadow:0 0 0 1px color-mix(in srgb, var(--accent) 22%, transparent), 0 5px 18px #0004; }
+.game-more-card .game-library-icon { background:color-mix(in srgb, var(--accent) 28%, #102238); border:1px solid color-mix(in srgb, var(--accent) 55%, transparent); }
+.game-more-card strong { color:#fff; }
+.game-more-card small { color:#d5e5f7; }
+.game-more-card button { margin-top:3px !important; padding:10px 12px !important; border:1px solid var(--accent) !important; border-radius:8px !important; background:var(--accent) !important; color:#fff !important; font-weight:800 !important; letter-spacing:.2px; box-shadow:0 3px 12px color-mix(in srgb, var(--accent) 32%, transparent); }
+.game-more-card button:hover { filter:brightness(1.12); }
 .game-library-empty { grid-column:1/-1; padding:18px; color:#b9c8dd; text-align:center; background:#ffffff09; border-radius:9px; }
 @media(max-width:1024px) and (pointer:coarse) {
     .game-center { gap:9px; }
