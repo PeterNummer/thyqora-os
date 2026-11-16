@@ -3282,6 +3282,11 @@ function openApp(app) {
 
     document.body.appendChild(win);
 
+    // Die Spielebibliothek direkt beim Öffnen initial befüllen.
+    if (app === "gamecenter") {
+        renderExternalGameLibrary();
+    }
+
     windows[app] = {
         element: win,
         minimized: false,
