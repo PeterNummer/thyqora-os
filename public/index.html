@@ -207,21 +207,9 @@ body.authenticated #authScreen {
     padding: 20px;
 }
 
-.desktop-widget-layer {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    z-index: 5;
-    display: grid;
-    grid-template-columns: repeat(2, minmax(190px, 245px));
-    grid-auto-rows: minmax(90px, auto);
-    gap: 10px;
-    max-width: min(510px, calc(100vw - 150px));
-    pointer-events: none;
-    align-content: start;
-}
+.desktop-widget-layer { position:absolute; inset:0; z-index:5; pointer-events:none; overflow:hidden; }
+.desktop-widget { position:absolute; width:min(245px, calc(100vw - 32px)); box-sizing:border-box; }
 .desktop-widget {
-    position: relative;
     min-width: 0;
     padding: 12px;
     color: white;
@@ -235,7 +223,8 @@ body.authenticated #authScreen {
     cursor: grab;
 }
 .desktop-widget:active { cursor: grabbing; }
-.desktop-widget h3 { margin: 0 0 8px; font-size: 12px; color: #c5d9f0; font-weight: 600; }
+.desktop-widget h3 { margin:0 25px 8px 0; font-size:12px; color:#c5d9f0; font-weight:600; user-select:none; -webkit-user-select:none; }
+.desktop-widget h3:active { cursor:grabbing; }
 .desktop-widget-value { font-size: 25px; font-weight: 700; }
 .desktop-widget-sub { margin-top: 4px; color: #b9c8dd; font-size: 11px; }
 .desktop-widget-weather { display:flex; align-items:center; gap:10px; }
@@ -272,13 +261,24 @@ body.authenticated #authScreen {
 .widget-center-row small { display:block; color:#b9c8dd; margin-top:3px; font-size:11px; }
 .widget-center-row button { margin:0; padding:7px 10px; }
 .widget-center-row button:disabled { opacity:.45; cursor:not-allowed; }
+@media(max-width:1024px) {
+    .desktop-widget { width:min(230px, calc(100vw - 32px)); }
+    .widget-center { top:max(66px, env(safe-area-inset-top)); right:12px; width:min(360px, calc(100vw - 24px)); max-height:calc(100dvh - 100px); }
+    .widget-center-row { align-items:flex-start; }
+    .widget-center-row button { min-height:40px; flex:0 0 auto; }
+}
 @media(max-width:760px) {
-    .desktop-widget-layer { top: 10px; right: 10px; grid-template-columns:minmax(160px, 1fr); max-width: min(230px, calc(100vw - 130px)); }
+    .desktop-widget { padding:10px; }
+    .desktop-widget-value { font-size:21px; }
+    .widget-center { padding:13px; }
+    .widget-center-row { gap:8px; }
+    .widget-center-row .widget-center-meta { overflow-wrap:anywhere; }
 }
 @media(max-width:430px) {
-    .desktop-widget-layer { top: 8px; right: 8px; max-width: calc(100vw - 125px); }
-    .desktop-widget { padding:9px; }
-    .desktop-widget-value { font-size:20px; }
+    .desktop-widget { width:min(205px, calc(100vw - 32px)); padding:9px; }
+    .desktop-widget-value { font-size:19px; }
+    .widget-center-row { flex-wrap:wrap; }
+    .widget-center-row button { width:100%; }
 }
 
 .desktop-icon.selected {
@@ -585,7 +585,17 @@ body.authenticated #authScreen {
 .browser-view iframe { width:100%; height:100%; min-height:100%; display:block; border:0; background:white; }
 .browser-status { flex:0 0 auto; margin:0; min-height:18px; color:#a9bfd8; font-size:12px; }
 .game-center { display:flex; flex:1 1 auto; flex-direction:column; gap:7px; height:100%; min-height:0; overflow:hidden; }
-.game-presets { display:grid; grid-auto-flow:column; grid-auto-columns:minmax(130px,1fr); grid-template-rows:1fr; gap:8px; overflow-x:auto; overflow-y:hidden; flex:0 0 auto; padding:2px 2px 7px; }
+.game-presets { display:grid; grid-auto-flow:column; grid-auto-columns:minmax(130px,1fr); grid-template-rows:1fr; gap:8px; overflow-x:auto; overflow-y:hidden; flex:0 0 auto; padding:2px 2px 7px; -webkit-overflow-scrolling:touch; }
+@media(max-width:1024px) and (pointer:coarse) {
+    .game-center { gap:9px; }
+    .game-presets { grid-auto-columns:minmax(145px, 180px); }
+    .game-stage { min-height:260px; }
+    .game-tile { min-height:86px; max-height:none; }
+}
+@media(max-width:760px) {
+    .game-stage { min-height:220px; }
+    .game-help { line-height:1.4; }
+}
 .game-tile { display:flex; flex-direction:column; align-items:flex-start; justify-content:center; gap:4px; min-height:78px; max-height:88px; padding:9px !important; margin:0 !important; text-align:left; background:#ffffff10 !important; }
 .game-tile span { font-size:22px; }
 .game-tile strong { font-size:13px; }
@@ -608,6 +618,17 @@ body.authenticated #authScreen {
 .memory-card { width:100%; aspect-ratio:1; margin:0 !important; font-size:23px; font-weight:700; }
 .memory-card.revealed { background:#1676c5 !important; }
 .memory-card.matched { background:#237b52 !important; opacity:.8; }
+.connect4-grid { display:grid; grid-template-columns:repeat(7,minmax(34px,48px)); gap:5px; padding:9px; background:#175ca8; border-radius:12px; }
+.connect4-cell { width:100%; aspect-ratio:1; border-radius:50% !important; margin:0 !important; padding:0 !important; background:#dbeafe !important; color:#17243b !important; font-size:20px; }
+.connect4-cell.red { background:#ef4444 !important; }
+.connect4-cell.yellow { background:#facc15 !important; }
+.reaction-pad { width:min(420px,100%); min-height:150px; border:0 !important; border-radius:14px !important; font-size:22px; font-weight:700; background:#334155 !important; touch-action:manipulation; }
+.reaction-pad.ready { background:#16834b !important; }
+.reaction-pad.waiting { background:#a83242 !important; }
+.number2048-grid { display:grid; grid-template-columns:repeat(4,minmax(48px,72px)); gap:6px; padding:8px; background:#8b7967; border-radius:10px; }
+.number2048-cell { display:grid; place-items:center; aspect-ratio:1; border-radius:7px; background:#d8cbbb; color:#263238; font-size:clamp(17px,3vw,25px); font-weight:800; }
+.number2048-controls { display:grid; grid-template-columns:repeat(3,48px); gap:5px; justify-content:center; }
+.number2048-controls button { margin:0 !important; padding:8px !important; }
 .ttt-grid { display:grid; grid-template-columns:repeat(3,75px); gap:7px; }
 .ttt-cell { width:75px; height:75px; margin:0 !important; font-size:30px; font-weight:700; }
 .game-add-row { display:flex; gap:7px; flex-wrap:wrap; }
@@ -619,7 +640,7 @@ body.authenticated #authScreen {
 .game-help { margin:0; color:#a9bfd8; font-size:12px; line-height:1.45; }
 
 
-/* NEUE APPS 0.8 */
+/* NEUE APPS 0.9 */
 .calculator-app,.system-control-app,.weather-app { display:flex; flex-direction:column; gap:13px; max-width:100%; }
 .calculator-heading,.weather-header { display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; }
 .calculator-heading h2,.weather-header h2,.system-control-heading h2 { margin:0 0 4px; }
@@ -1167,6 +1188,7 @@ const WIDGET_CATALOG = {
     weather: {title:"Wetter", icon:"🌦️", description:"Zeigt das aktuelle Wetter für deinen gespeicherten Ort.", requiresApp:"weather"}
 };
 let desktopWidgets = [...DEFAULT_DESKTOP_WIDGETS];
+let desktopWidgetPositions = {};
 let widgetWeatherRequest = 0;
 
 let windows = {};
@@ -1250,6 +1272,9 @@ function saveDesktopShortcuts() {
 
 function saveDesktopWidgets() {
     return queueSave("thyqoraDesktopWidgets", desktopWidgets);
+}
+function saveDesktopWidgetPositions() {
+    return queueSave("thyqoraDesktopWidgetPositions", desktopWidgetPositions);
 }
 
 function isWidgetAvailable(id) {
@@ -1366,6 +1391,11 @@ async function loadCloudSettings() {
             ? [...new Set(loadedWidgets.filter(isWidgetAvailable))]
             : [...DEFAULT_DESKTOP_WIDGETS];
 
+        const loadedWidgetPositions = readValue("thyqoraDesktopWidgetPositions");
+        desktopWidgetPositions = loadedWidgetPositions && typeof loadedWidgetPositions === "object" && !Array.isArray(loadedWidgetPositions)
+            ? loadedWidgetPositions
+            : {};
+
         applySettings();
         renderDesktop();
 
@@ -1378,6 +1408,7 @@ async function loadCloudSettings() {
         await saveInstalledApps();
         await saveDesktopShortcuts();
         await saveDesktopWidgets();
+        await saveDesktopWidgetPositions();
 
         notify("Cloud geladen", "Deine THYQORA-Daten wurden geladen.");
 
@@ -2381,6 +2412,9 @@ function gameCenterContent() {
                 <button type="button" class="game-tile" onclick="launchBuiltinGame('snake')"><span>🐍</span><strong>Snake</strong><small>Iss Äpfel und werde länger.</small></button>
                 <button type="button" class="game-tile" onclick="launchBuiltinGame('memory')"><span>🧠</span><strong>Memory</strong><small>Finde alle Kartenpaare.</small></button>
                 <button type="button" class="game-tile" onclick="launchBuiltinGame('tictactoe')"><span>⭕</span><strong>Tic-Tac-Toe</strong><small>Spiele zu zweit auf einem Feld.</small></button>
+                <button type="button" class="game-tile" onclick="launchBuiltinGame('connect4')"><span>🔴</span><strong>Vier gewinnt</strong><small>Verbinde vier Steine in einer Reihe.</small></button>
+                <button type="button" class="game-tile" onclick="launchBuiltinGame('reaction')"><span>⚡</span><strong>Reaktionstest</strong><small>Teste dein Reaktionsvermögen.</small></button>
+                <button type="button" class="game-tile" onclick="launchBuiltinGame('2048')"><span>🔢</span><strong>2048</strong><small>Kombiniere gleiche Zahlen.</small></button>
             </div>
             <h3 class="store-section-title" style="margin:2px 0">Weitere Spiele aus dem Internet</h3>
             <div class="game-presets">
@@ -2597,6 +2631,68 @@ function launchBuiltinGame(name) {
             grid.appendChild(cell);
         });
     }
+    if (name === "connect4") {
+        stage.innerHTML = `<div class="builtin-game"><h3>🔴 Vier gewinnt</h3><p class="game-help" id="connect4Status">Rot ist dran.</p><div class="connect4-grid" id="connect4Grid"></div><button type="button" onclick="launchBuiltinGame('connect4')">Neues Spiel</button></div>`;
+        let board=Array.from({length:6},()=>Array(7).fill(""));
+        let player="red", finished=false;
+        const grid=document.getElementById("connect4Grid"), dirs=[[0,1],[1,0],[1,1],[1,-1]];
+        for(let row=0;row<6;row++) for(let col=0;col<7;col++) {
+            const cell=document.createElement("button"); cell.type="button"; cell.className="connect4-cell";
+            cell.setAttribute("aria-label","Spalte "+(col+1));
+            cell.onclick=()=>{
+                if(finished)return;
+                let target=-1; for(let r=5;r>=0;r--)if(!board[r][col]){target=r;break;}
+                if(target<0)return; board[target][col]=player;
+                const won=dirs.some(([dr,dc])=>{
+                    let count=1;
+                    for(const sign of [-1,1]){let r=target+dr*sign,c=col+dc*sign;while(r>=0&&r<6&&c>=0&&c<7&&board[r][c]===player){count++;r+=dr*sign;c+=dc*sign;}}
+                    return count>=4;
+                });
+                if(won){finished=true;document.getElementById("connect4Status").textContent=(player==="red"?"Rot":"Gelb")+" hat gewonnen!";}
+                else if(board.every(row=>row.every(Boolean))){finished=true;document.getElementById("connect4Status").textContent="Unentschieden!";}
+                else {player=player==="red"?"yellow":"red";document.getElementById("connect4Status").textContent=(player==="red"?"Rot":"Gelb")+" ist dran.";}
+                grid.querySelectorAll(".connect4-cell").forEach((button,index)=>{const r=Math.floor(index/7),c=index%7;button.classList.toggle("red",board[r][c]==="red");button.classList.toggle("yellow",board[r][c]==="yellow");button.textContent=board[r][c]?"●":"";});
+            };
+            grid.appendChild(cell);
+        }
+        return;
+    }
+
+    if (name === "reaction") {
+        stage.innerHTML = `<div class="builtin-game"><h3>⚡ Reaktionstest</h3><p class="game-help" id="reactionStatus">Tippe auf Start und warte auf Grün.</p><button type="button" id="reactionPad" class="reaction-pad">Start</button><p class="game-help" id="reactionBest">Deine Zeit wird hier angezeigt.</p></div>`;
+        const pad=document.getElementById("reactionPad"), status=document.getElementById("reactionStatus"), best=document.getElementById("reactionBest");
+        let timer=null, startedAt=0, ready=false, waiting=false;
+        pad.onclick=()=>{
+            if(!waiting&&!ready){waiting=true;pad.className="reaction-pad waiting";pad.textContent="Warte …";status.textContent="Tippe erst, wenn die Fläche grün wird.";timer=setTimeout(()=>{ready=true;waiting=false;startedAt=performance.now();pad.className="reaction-pad ready";pad.textContent="JETZT!";},1200+Math.random()*2600);}
+            else if(waiting){clearTimeout(timer);waiting=false;pad.className="reaction-pad";pad.textContent="Nochmal versuchen";status.textContent="Zu früh! Warte auf Grün.";}
+            else if(ready){const elapsed=Math.round(performance.now()-startedAt);ready=false;pad.className="reaction-pad";pad.textContent="Nochmal";status.textContent="Deine Reaktionszeit: "+elapsed+" ms";best.textContent="Starte erneut für eine weitere Runde.";}
+        };
+        return;
+    }
+
+    if (name === "2048") {
+        let board=Array.from({length:4},()=>Array(4).fill(0));
+        const spawn=()=>{const empty=[];board.forEach((row,r)=>row.forEach((v,c)=>{if(!v)empty.push([r,c]);}));if(empty.length){const [r,c]=empty[Math.floor(Math.random()*empty.length)];board[r][c]=Math.random()<0.9?2:4;}};
+        const draw=()=>{const grid=document.getElementById("number2048Grid");if(!grid)return;grid.innerHTML=board.flat().map(v=>"<div class='number2048-cell'>"+(v||"")+"</div>").join("");document.getElementById("number2048Score").textContent=board.flat().reduce((a,b)=>a+b,0);};
+        const move=direction=>{
+            const before=JSON.stringify(board);
+            for(let i=0;i<4;i++){
+                let line=direction==="left"||direction==="right"?board[i].slice():board.map(row=>row[i]);
+                if(direction==="right"||direction==="down")line.reverse();
+                line=line.filter(Boolean);
+                for(let k=0;k<line.length-1;k++)if(line[k]===line[k+1]){line[k]*=2;line.splice(k+1,1);}
+                while(line.length<4)line.push(0);
+                if(direction==="right"||direction==="down")line.reverse();
+                if(direction==="left"||direction==="right")board[i]=line;else for(let r=0;r<4;r++)board[r][i]=line[r];
+            }
+            if(before!==JSON.stringify(board)){spawn();draw();}
+        };
+        stage.innerHTML=`<div class="builtin-game"><h3>🔢 2048</h3><p class="game-help">Kombiniere gleiche Zahlen. Nutze Pfeiltasten oder die Tasten unten.</p><p class="game-help">Punktestand: <strong id="number2048Score">0</strong></p><div class="number2048-grid" id="number2048Grid"></div><div class="number2048-controls"><span></span><button type="button" onclick="window.thyqora2048Move('up')">↑</button><span></span><button type="button" onclick="window.thyqora2048Move('left')">←</button><button type="button" onclick="window.thyqora2048Move('down')">↓</button><button type="button" onclick="window.thyqora2048Move('right')">→</button></div><button type="button" onclick="launchBuiltinGame('2048')">Neu starten</button></div>`;
+        window.thyqora2048Move=move;
+        document.onkeydown=event=>{const keys={ArrowUp:"up",ArrowDown:"down",ArrowLeft:"left",ArrowRight:"right"};if(keys[event.key]){event.preventDefault();move(keys[event.key]);}};
+        spawn();spawn();draw();
+    }
+
 }
 
 function startSnake() {
@@ -2830,7 +2926,7 @@ function systemControlContent() {
         Object.entries(wallpapers).map(([number,background]) => "<button type='button' class='control-wallpaper " + (Number(settings.background) === Number(number) ? "selected" : "") + "' data-wallpaper='" + number + "' style='background:" + background + "' aria-label='Hintergrund " + number + "' title='Hintergrund " + number + "' onclick='setBackground(" + number + ")'></button>").join("") +
         "</div></section>" +
         "<section class='control-section'><h3>🔊 THYQORA-Lautstärke</h3><div class='control-volume-row'><input class='system-control-volume' type='range' min='0' max='100' value='" + settings.volume + "' oninput='setVolume(this.value)' aria-label='THYQORA-Lautstärke'><strong class='system-control-volume-value'>" + settings.volume + "%</strong></div><p class='monitor-note'>Dieser Regler speichert die Lautstärke-Einstellung in THYQORA OS. Er verändert nicht die Windows-Lautstärke.</p></section>" +
-        "<section class='control-section control-account'><h3>👤 Konto und System</h3><div><span>Angemeldet als</span><strong>" + escapeHTML(currentUsername || "Unbekannt") + "</strong></div><div><span>Version</span><strong>THYQORA OS 0.8</strong></div><div><span>Cloud-Speicher</span><strong>" + (cloudReady ? "Verbunden" : "Nicht verbunden") + "</strong></div><button type='button' onclick='logout()'>Abmelden</button></section></div>";
+        "<section class='control-section control-account'><h3>👤 Konto und System</h3><div><span>Angemeldet als</span><strong>" + escapeHTML(currentUsername || "Unbekannt") + "</strong></div><div><span>Version</span><strong>THYQORA OS 0.9</strong></div><div><span>Cloud-Speicher</span><strong>" + (cloudReady ? "Verbunden" : "Nicht verbunden") + "</strong></div><button type='button' onclick='logout()'>Abmelden</button></section></div>";
 }
 
 
@@ -2984,7 +3080,7 @@ function getAppContent(app) {
         return `
             <div class="terminal">
                 <div id="terminalOutput">
-                    THYQORA TERMINAL [Version 0.8]<br>
+                    THYQORA TERMINAL [Version 0.9]<br>
                     Schreibe help für alle Befehle.<br><br>
                 </div>
 
@@ -3000,7 +3096,7 @@ function getAppContent(app) {
     if (app === "about") {
         return `
             <h2>💻 THYQORA OS</h2>
-            <p>Version 0.8</p>
+            <p>Version 0.9</p>
             <p>Ein eigenes browserbasiertes Betriebssystem.</p>
 
             <h3>Systeminformationen</h3>
@@ -3391,55 +3487,75 @@ function renderDesktopWidgets() {
     const layer = document.createElement("div");
     layer.className = "desktop-widget-layer";
     layer.id = "desktopWidgetLayer";
+    desktop.appendChild(layer);
 
     desktopWidgets = desktopWidgets.filter(isWidgetAvailable);
-    desktopWidgets.forEach(id => {
+    const narrowLayout = window.matchMedia("(max-width: 760px)").matches;
+
+    desktopWidgets.forEach((id, index) => {
         const widget = WIDGET_CATALOG[id];
         if (!widget) return;
         const card = document.createElement("section");
         card.className = "desktop-widget";
-        card.draggable = true;
         card.dataset.widgetId = id;
 
         let body = "";
-        if (id === "clock") {
-            body = "<div class='desktop-widget-value' data-widget-clock>--:--:--</div><div class='desktop-widget-sub'>THYQORA OS</div>";
-        } else if (id === "date") {
-            body = "<div class='desktop-widget-value' data-widget-date>--</div><div class='desktop-widget-sub'>Kalenderdatum</div>";
-        } else if (id === "system") {
-            body = "<div class='desktop-widget-value'>" + (navigator.hardwareConcurrency || "–") + " Kerne</div><div class='desktop-widget-sub'>" + screen.width + " × " + screen.height + " · " + (navigator.onLine ? "Online" : "Offline") + "</div>";
-        } else if (id === "weather") {
-            body = "<div class='desktop-widget-weather'><span class='weather-icon' data-widget-weather-icon>🌦️</span><div><strong data-widget-weather-temp>--°</strong><div class='desktop-widget-sub' data-widget-weather-place>" + (weatherCity ? escapeHTML(weatherCity) : "Ort in Wetter-App festlegen") + "</div></div></div><div class='desktop-widget-sub' data-widget-weather-description>Wetter wird geladen …</div>";
-        }
+        if (id === "clock") body = "<div class='desktop-widget-value' data-widget-clock>--:--:--</div><div class='desktop-widget-sub'>THYQORA OS</div>";
+        else if (id === "date") body = "<div class='desktop-widget-value' data-widget-date>--</div><div class='desktop-widget-sub'>Kalenderdatum</div>";
+        else if (id === "system") body = "<div class='desktop-widget-value'>" + (navigator.hardwareConcurrency || "–") + " Kerne</div><div class='desktop-widget-sub'>" + screen.width + " × " + screen.height + " · " + (navigator.onLine ? "Online" : "Offline") + "</div>";
+        else if (id === "weather") body = "<div class='desktop-widget-weather'><span class='weather-icon' data-widget-weather-icon>🌦️</span><div><strong data-widget-weather-temp>--°</strong><div class='desktop-widget-sub' data-widget-weather-place>" + (weatherCity ? escapeHTML(weatherCity) : "Ort in Wetter-App festlegen") + "</div></div></div><div class='desktop-widget-sub' data-widget-weather-description>Wetter wird geladen …</div>";
 
-        card.innerHTML = "<button class='desktop-widget-remove' type='button' title='Widget entfernen' aria-label='Widget entfernen'>×</button><h3>" + widget.icon + " " + widget.title + "</h3>" + body;
+        card.innerHTML = "<button class='desktop-widget-remove' type='button' title='Widget entfernen' aria-label='Widget entfernen'>×</button><h3 title='Zum Verschieben ziehen'>⠿ " + widget.icon + " " + widget.title + "</h3>" + body;
         card.querySelector(".desktop-widget-remove").addEventListener("click", () => removeDesktopWidget(id));
-        card.addEventListener("dragstart", event => {
-            event.dataTransfer.setData("text/plain", "thyqora-widget:" + id);
-            event.dataTransfer.effectAllowed = "move";
-        });
-        card.addEventListener("dragover", event => event.preventDefault());
-        card.addEventListener("drop", event => {
-            event.preventDefault();
-            event.stopPropagation();
-            const dragged = event.dataTransfer.getData("text/plain").replace("thyqora-widget:", "");
-            if (dragged && dragged !== id) moveDesktopWidget(dragged, id);
-        });
         layer.appendChild(card);
-    });
 
-    desktop.appendChild(layer);
+        const maxLeft = Math.max(0, layer.clientWidth - card.offsetWidth - 12);
+        const maxTop = Math.max(0, layer.clientHeight - card.offsetHeight - 76);
+        const saved = desktopWidgetPositions[id];
+        let left = saved && Number.isFinite(saved.x) ? Math.max(8, Math.min(maxLeft, saved.x * maxLeft)) : (narrowLayout ? maxLeft : Math.max(8, maxLeft - (index % 2) * 255));
+        let top = saved && Number.isFinite(saved.y) ? Math.max(8, Math.min(maxTop, saved.y * maxTop)) : (narrowLayout ? 12 + index * 108 : 16 + Math.floor(index / 2) * 108);
+        top = Math.min(top, maxTop);
+        card.style.left = left + "px";
+        card.style.top = top + "px";
+        if (!saved) desktopWidgetPositions[id] = {x:maxLeft ? left/maxLeft : 0, y:maxTop ? top/maxTop : 0};
+
+        const handle = card.querySelector("h3");
+        handle.style.touchAction = "none";
+        handle.style.cursor = "grab";
+        handle.addEventListener("pointerdown", event => {
+            if (event.button !== undefined && event.button !== 0) return;
+            event.preventDefault();
+            const x0=event.clientX, y0=event.clientY, left0=card.offsetLeft, top0=card.offsetTop;
+            handle.setPointerCapture?.(event.pointerId);
+            handle.style.cursor="grabbing";
+            const move=e=>{
+                card.style.left=Math.max(8,Math.min(layer.clientWidth-card.offsetWidth-8,left0+e.clientX-x0))+"px";
+                card.style.top=Math.max(8,Math.min(layer.clientHeight-card.offsetHeight-76,top0+e.clientY-y0))+"px";
+            };
+            const finish=()=>{
+                handle.removeEventListener("pointermove",move);
+                handle.removeEventListener("pointerup",finish);
+                handle.removeEventListener("pointercancel",finish);
+                handle.style.cursor="grab";
+                const mx=Math.max(1,layer.clientWidth-card.offsetWidth-12), my=Math.max(1,layer.clientHeight-card.offsetHeight-76);
+                desktopWidgetPositions[id]={x:Math.max(0,Math.min(1,card.offsetLeft/mx)),y:Math.max(0,Math.min(1,card.offsetTop/my))};
+                saveDesktopWidgetPositions();
+            };
+            handle.addEventListener("pointermove",move);
+            handle.addEventListener("pointerup",finish);
+            handle.addEventListener("pointercancel",finish);
+        });
+    });
 
     const center = document.createElement("div");
     center.className = "widget-center";
     center.id = "widgetCenter";
-    center.innerHTML = "<h3>▦ Desktop-Widgets</h3><p>Füge Widgets hinzu oder entferne sie. Ziehe Widgets auf dem Desktop zum Umordnen.</p><div class='widget-center-list' id='widgetCenterList'></div>";
+    center.innerHTML = "<h3>▦ Desktop-Widgets</h3><p>Füge Widgets hinzu oder entferne sie. Ziehe sie am Titel mit Maus oder Finger an die gewünschte Stelle.</p><div class='widget-center-list' id='widgetCenterList'></div>";
     desktop.appendChild(center);
     renderWidgetCenterList();
     updateDesktopWidgetClock();
     if (desktopWidgets.includes("weather")) loadDesktopWeatherWidget();
 }
-
 function renderWidgetCenterList() {
     const list = document.getElementById("widgetCenterList");
     if (!list) return;
@@ -3923,7 +4039,7 @@ function appCenterContent() {
         <div class="system-monitor">
             <div>
                 <h2 style="margin:0">🛍️ App-Center</h2>
-                <p class="monitor-note">Installiere und verwalte deine THYQORA-Apps. Neu in Version 0.8: Taschenrechner, Systemsteuerung und Wetter.</p>
+                <p class="monitor-note">Installiere und verwalte deine THYQORA-Apps. Neu in Version 0.9: Taschenrechner, Systemsteuerung und Wetter.</p>
             </div>
             <h3 class="store-section-title">Installierte Apps</h3>
             <div id="appCenterInstalled" class="store-list"></div>
@@ -4113,7 +4229,7 @@ function runCommand() {
     } else if (command === "about") {
         result = "THYQORA OS – ein browserbasiertes Betriebssystem.";
     } else if (command === "version") {
-        result = "THYQORA OS Version 0.8";
+        result = "THYQORA OS Version 0.9";
     } else if (command === "date") {
         result = new Date().toLocaleDateString("de-DE");
     } else if (command === "time") {
@@ -4123,7 +4239,7 @@ function runCommand() {
     } else if (command === "uptime") {
         result = "Diese Sitzung läuft seit " + formatSessionUptime() + ".";
     } else if (command === "sysinfo" || command === "system") {
-        result = "THYQORA OS 0.8 | Browser: " + navigator.userAgent +
+        result = "THYQORA OS 0.9 | Browser: " + navigator.userAgent +
             " | " + navigator.hardwareConcurrency + " logische CPU-Kerne" +
             " | Bildschirm: " + screen.width + "x" + screen.height;
     } else if (command === "memory" || command === "ram") {
