@@ -601,8 +601,10 @@ body.authenticated #authScreen {
 .game-library-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(155px,1fr)); gap:8px; overflow:auto; min-height:0; padding:2px 3px 8px 1px; align-content:start; }
 .game-library-card { display:flex; min-width:0; flex-direction:column; gap:5px; padding:10px; border:1px solid #ffffff20; border-radius:10px; background:#ffffff0d; }
 .game-library-card .game-library-card-top { display:flex; align-items:center; gap:8px; min-width:0; }
-.game-library-card .game-library-icon { display:grid; place-items:center; width:52px; height:42px; overflow:hidden; border-radius:7px; background:#ffffff12; font-size:22px; flex:0 0 52px; }
+.game-library-card .game-library-icon { display:block; position:relative; place-items:center; width:52px; height:42px; overflow:hidden; border-radius:7px; background:#ffffff12; font-size:22px; flex:0 0 52px; }
 .game-library-card .game-library-icon img { display:block; width:100%; height:100%; object-fit:cover; }
+.game-library-cover-frame { position:absolute; top:0; left:0; width:800px; height:600px; border:0; pointer-events:none; transform:scale(.13); transform-origin:top left; }
+.game-provider-filter { flex:0 1 180px; min-width:140px; max-width:100%; padding:8px 10px; border:1px solid #ffffff24; border-radius:8px; background:#102238; color:#eaf3ff; font:inherit; font-size:12px; }
 .game-library-card strong { font-size:13px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .game-library-card small { min-height:29px; color:#b9c8dd; font-size:11px; line-height:1.35; }
 .game-library-card button { width:100%; margin:0 !important; padding:7px 9px !important; font-size:12px; }
@@ -2530,6 +2532,7 @@ const externalGameCatalog = [
 ];;
 
 let selectedExternalGameCategory = "Alle";
+let selectedExternalGameProvider = "Alle Websites";
 
 function gameCenterContent() {
     return `
@@ -2553,6 +2556,9 @@ function gameCenterContent() {
                     <h3 class="store-section-title" style="margin:2px 0 6px">Spielebibliothek <span id="gameLibraryCount" style="color:#9eb7d3;font-size:11px;font-weight:400"></span></h3>
                     <div class="game-library-toolbar">
                         <input id="gameLibrarySearch" class="game-library-search" type="search" placeholder="🔎 Spiele suchen …" oninput="renderExternalGameLibrary()">
+                        <select id="gameProviderFilter" class="game-provider-filter" aria-label="Nach Website filtern" onchange="setExternalGameProvider(this.value)">
+                            <option value="Alle Websites">Alle Websites</option>
+                        </select>
                     </div>
                 </div>
                 <div class="game-category-list" id="gameCategoryList">
@@ -2572,18 +2578,32 @@ function setExternalGameCategory(category) {
     renderExternalGameLibrary();
 }
 
+function setExternalGameProvider(provider) {
+    selectedExternalGameProvider = provider || "Alle Websites";
+    renderExternalGameLibrary();
+}
+
 function renderExternalGameLibrary() {
     const grid = document.getElementById("gameLibraryGrid");
     const categoryList = document.getElementById("gameCategoryList");
     const search = document.getElementById("gameLibrarySearch");
+    const providerFilter = document.getElementById("gameProviderFilter");
     const count = document.getElementById("gameLibraryCount");
     if (!grid) return;
+
+    if (providerFilter) {
+        const providers = [...new Set(externalGameCatalog.map(game => game.provider || "Unbekannt"))].sort();
+        providerFilter.innerHTML = '<option value="Alle Websites">Alle Websites</option>' +
+            providers.map(provider => '<option value="' + provider.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") + '">' + provider.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") + '</option>').join("");
+        providerFilter.value = selectedExternalGameProvider;
+    }
 
     const query = (search?.value || "").trim().toLocaleLowerCase("de");
     const games = externalGameCatalog.filter(game => {
         const matchesCategory = selectedExternalGameCategory === "Alle" || game.category === selectedExternalGameCategory;
+        const matchesProvider = selectedExternalGameProvider === "Alle Websites" || (game.provider || "Unbekannt") === selectedExternalGameProvider;
         const matchesSearch = !query || (game.name + " " + game.description + " " + game.category + " " + (game.provider || "")).toLocaleLowerCase("de").includes(query);
-        return matchesCategory && matchesSearch;
+        return matchesCategory && matchesProvider && matchesSearch;
     });
 
     if (count) count.textContent = "(" + games.length + " Spiele)";
@@ -2609,10 +2629,21 @@ function renderExternalGameLibrary() {
         if (game.image) {
             const image = document.createElement("img");
             image.src = game.image;
-            image.alt = game.name;
+            image.alt = game.name + " Cover";
             image.loading = "lazy";
             image.onerror = () => { icon.textContent = game.icon; };
             icon.appendChild(image);
+        } else if (game.provider === "PlayBolt") {
+            // PlayBolt zeigt im offiziellen /play/-Player sein eigenes Titel-Cover.
+            const cover = document.createElement("iframe");
+            cover.className = "game-library-cover-frame";
+            cover.src = game.url;
+            cover.title = game.name + " Original-Cover";
+            cover.loading = "lazy";
+            cover.tabIndex = -1;
+            cover.setAttribute("aria-hidden", "true");
+            cover.setAttribute("sandbox", "allow-scripts allow-same-origin");
+            icon.appendChild(cover);
         } else {
             icon.textContent = game.icon;
         }
