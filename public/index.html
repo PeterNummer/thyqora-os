@@ -2613,23 +2613,15 @@ function renderExternalGameLibrary() {
         top.className = "game-library-card-top";
         const icon = document.createElement("span");
         icon.className = "game-library-icon";
-        if (game.image) {
+        if (game.provider === "PlayBolt") {
+            icon.textContent = game.icon;
+        } else if (game.image) {
             const image = document.createElement("img");
             image.src = game.image;
             image.alt = game.name + " Cover";
             image.loading = "lazy";
             image.onerror = () => { icon.textContent = game.icon; };
             icon.appendChild(image);
-        } else if (game.provider === "PlayBolt") {
-            const cover = document.createElement("iframe");
-            cover.className = "game-library-cover-frame";
-            cover.src = game.url;
-            cover.title = game.name + " Original-Cover";
-            cover.loading = "lazy";
-            cover.tabIndex = -1;
-            cover.setAttribute("aria-hidden", "true");
-            cover.setAttribute("sandbox", "allow-scripts allow-same-origin");
-            icon.appendChild(cover);
         } else {
             icon.textContent = game.icon;
         }
