@@ -586,7 +586,7 @@ body.authenticated #authScreen {
 .browser-status { flex:0 0 auto; margin:0; min-height:18px; color:#a9bfd8; font-size:12px; }
 .game-center { display:flex; flex:1 1 auto; flex-direction:column; gap:8px; height:100%; min-height:0; overflow:hidden; }
 .game-presets { display:grid; grid-auto-flow:column; grid-auto-columns:minmax(130px,1fr); grid-template-rows:1fr; gap:8px; overflow-x:auto; overflow-y:hidden; flex:0 0 auto; padding:2px 2px 7px; -webkit-overflow-scrolling:touch; }
-.game-library { display:flex; flex:0 1 42%; min-height:145px; flex-direction:column; gap:8px; overflow:hidden; }
+.game-library { display:flex; flex:1 1 auto; min-height:0; flex-direction:column; gap:8px; overflow:hidden; }
 .game-library-toolbar { display:flex; align-items:center; gap:8px; flex-wrap:wrap; flex:0 0 auto; }
 .game-library-search { flex:1 1 190px; min-width:130px; max-width:none; margin:0 !important; padding:10px 12px; color:white; background:#071525; border:1px solid #ffffff30; border-radius:8px; outline:none; }
 .game-category-list { display:flex; gap:6px; overflow-x:auto; flex:0 0 auto; padding:2px 1px 5px; }
@@ -603,14 +603,14 @@ body.authenticated #authScreen {
 @media(max-width:1024px) and (pointer:coarse) {
     .game-center { gap:9px; }
     .game-presets { grid-auto-columns:minmax(145px, 180px); }
-    .game-library { flex-basis:44%; min-height:130px; }
+    .game-library { flex:1 1 auto; min-height:0; }
     .game-library-grid { grid-template-columns:repeat(auto-fill,minmax(145px,1fr)); }
     .game-stage { min-height:220px; }
     .game-tile { min-height:86px; max-height:none; }
 }
 @media(max-width:760px) {
     .game-stage { min-height:170px; }
-    .game-library { flex-basis:46%; min-height:120px; }
+    .game-library { flex:1 1 auto; min-height:0; }
     .game-library-grid { grid-template-columns:repeat(auto-fill,minmax(132px,1fr)); gap:6px; }
     .game-library-card { padding:8px; }
     .game-help { line-height:1.4; }
@@ -2494,9 +2494,6 @@ function gameCenterContent() {
                     `).join("")}
                 </div>
                 <div class="game-library-grid" id="gameLibraryGrid"></div>
-            </div>
-            <div class="game-stage-toolbar">
-                <button type="button" onclick="toggleGameFullscreen()">⛶ Vollbild</button>
             </div>
             <div class="game-stage" id="gameStage" style="display:none"></div>
         </div>
