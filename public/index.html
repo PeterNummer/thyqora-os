@@ -601,7 +601,8 @@ body.authenticated #authScreen {
 .game-library-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(155px,1fr)); gap:8px; overflow:auto; min-height:0; padding:2px 3px 8px 1px; align-content:start; }
 .game-library-card { display:flex; min-width:0; flex-direction:column; gap:5px; padding:10px; border:1px solid #ffffff20; border-radius:10px; background:#ffffff0d; }
 .game-library-card .game-library-card-top { display:flex; align-items:center; gap:8px; min-width:0; }
-.game-library-card .game-library-icon { font-size:22px; flex:0 0 auto; }
+.game-library-card .game-library-icon { display:grid; place-items:center; width:52px; height:42px; overflow:hidden; border-radius:7px; background:#ffffff12; font-size:22px; flex:0 0 52px; }
+.game-library-card .game-library-icon img { display:block; width:100%; height:100%; object-fit:cover; }
 .game-library-card strong { font-size:13px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .game-library-card small { min-height:29px; color:#b9c8dd; font-size:11px; line-height:1.35; }
 .game-library-card button { width:100%; margin:0 !important; padding:7px 9px !important; font-size:12px; }
@@ -2516,7 +2517,12 @@ const externalGameCatalog = [
     {id:"unbolted",name:"Unbolted",icon:"🔩",description:"Entferne Schrauben in der richtigen Reihenfolge.",category:"Puzzle",url:"https://playbolt.app/play/unbolted/",page:"https://playbolt.app/de/games/",provider:"PlayBolt"},
     {id:"merge-drop",name:"Merge Drop",icon:"🔵",description:"Kombiniere gleiche Teile zu größeren Elementen.",category:"Puzzle",url:"https://playbolt.app/play/merge-drop/",page:"https://playbolt.app/de/games/",provider:"PlayBolt"},
     {id:"block-puzzle",name:"Block Puzzle",icon:"🧩",description:"Fülle Reihen und Spalten mit Formen.",category:"Puzzle",url:"https://playbolt.app/play/block-puzzle/",page:"https://playbolt.app/de/games/",provider:"PlayBolt"},
-    {id:"water-sort",name:"Water Sort",icon:"🧪",description:"Sortiere farbige Flüssigkeiten in passende Gefäße.",category:"Puzzle",url:"https://playbolt.app/play/water-sort/",page:"https://playbolt.app/de/games/",provider:"PlayBolt"}
+    {id:"water-sort",name:"Water Sort",icon:"🧪",description:"Sortiere farbige Flüssigkeiten in passende Gefäße.",category:"Puzzle",url:"https://playbolt.app/play/water-sort/",page:"https://playbolt.app/de/games/",provider:"PlayBolt"},
+    {id:"gd-just-right",name:"Just Right",icon:"🧩",image:"https://img.gamedistribution.com/a25ee674ac2742b7a25bb979cc29ea23-512x384.jpg",description:"Sortiere und ordne Gegenstände an den passenden Platz.",category:"Puzzle",url:"https://html5.gamedistribution.com/a25ee674ac2742b7a25bb979cc29ea23/?gd_sdk_referrer_url=https://gamedistribution.com/games/just-right/",page:"https://gamedistribution.com/games/just-right/",provider:"GameDistribution"},
+    {id:"gd-pixel-nono",name:"Pixel Nono",icon:"🖼️",image:"https://img.gamedistribution.com/360416a1dbe643f3bd54f1de9d191e27-512x384.jpg",description:"Löse ein Zahlenrätsel und entdecke ein Pixelbild.",category:"Puzzle",url:"https://html5.gamedistribution.com/360416a1dbe643f3bd54f1de9d191e27/?gd_sdk_referrer_url=https://gamedistribution.com/games/pixel-nono/",page:"https://gamedistribution.com/games/pixel-nono/",provider:"GameDistribution"},
+    {id:"gd-fruit-blast",name:"Fruit Blast",icon:"🍉",image:"https://img.gamedistribution.com/eaef2e830f5a46bbb2573748a19bce41-512x384.jpg",description:"Kombiniere gleiche Früchte und knacke Level.",category:"Puzzle",url:"https://html5.gamedistribution.com/eaef2e830f5a46bbb2573748a19bce41/?gd_sdk_referrer_url=https://gamedistribution.com/games/fruit-blast/",page:"https://gamedistribution.com/games/fruit-blast/",provider:"GameDistribution"},
+    {id:"gd-juicy-match",name:"Juicy Match",icon:"🍓",image:"https://img.gamedistribution.com/0d95d64a4b8e440981a7b067c483cdf2-512x384.jpg",description:"Verbinde Früchte in diesem Match-3-Puzzlespiel.",category:"Puzzle",url:"https://html5.gamedistribution.com/0d95d64a4b8e440981a7b067c483cdf2/?gd_sdk_referrer_url=https://gamedistribution.com/games/juicy-match/",page:"https://gamedistribution.com/games/juicy-match/",provider:"GameDistribution"},
+    {id:"gd-happy-food-link",name:"Happy Food Link",icon:"🍱",image:"https://img.gamedistribution.com/8bc0db59d4f447db82318bd0d030a24c-512x384.jpg",description:"Finde passende Essenspaare auf dem Spielfeld.",category:"Puzzle",url:"https://html5.gamedistribution.com/8bc0db59d4f447db82318bd0d030a24c/?gd_sdk_referrer_url=https://gamedistribution.com/games/happy-food-link/",page:"https://gamedistribution.com/games/happy-food-link/",provider:"GameDistribution"}
 ];;
 
 let selectedExternalGameCategory = "Alle";
@@ -2596,7 +2602,16 @@ function renderExternalGameLibrary() {
         top.className = "game-library-card-top";
         const icon = document.createElement("span");
         icon.className = "game-library-icon";
-        icon.textContent = game.icon;
+        if (game.image) {
+            const image = document.createElement("img");
+            image.src = game.image;
+            image.alt = game.name;
+            image.loading = "lazy";
+            image.onerror = () => { icon.textContent = game.icon; };
+            icon.appendChild(image);
+        } else {
+            icon.textContent = game.icon;
+        }
         const name = document.createElement("strong");
         name.textContent = game.name;
         top.append(icon, name);
